@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, UserCheck } from "lucide-react";
 
 type CustomerRole = "BUYER" | "DEBTOR" | "AGGREGATOR";
@@ -37,6 +38,7 @@ function roleBadgeClass(role: CustomerRole) {
 }
 
 export function CustomersManager({ initialCustomers, initialPagination }: Props) {
+  const router = useRouter();
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [search, setSearch] = useState("");
@@ -95,6 +97,10 @@ export function CustomersManager({ initialCustomers, initialPagination }: Props)
     fetchCustomers(1, "", "");
   }
 
+  // Showing X–Y of Z
+  const rangeStart = pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.pageSize + 1;
+  const rangeEnd = Math.min(pagination.page * pagination.pageSize, pagination.total);
+
   return (
     <div>
       {/* Header */}
@@ -150,52 +156,151 @@ export function CustomersManager({ initialCustomers, initialPagination }: Props)
           </p>
         </div>
       ) : (
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${loading ? "opacity-60" : ""}`}>
-          {customers.map((c) => (
-            <Link
-              key={c.id}
-              href={`/dashboard/customers/${c.id}`}
-              className="bg-white rounded-[12px] border border-gray-200 shadow-card p-4 hover:border-primary hover:shadow-md transition-all"
-            >
-              <h3 className="font-display font-semibold text-agro-dark">{c.name}</h3>
-              <p className="text-muted text-xs">{c.phone}</p>
-              {c.email && <p className="text-muted text-xs">{c.email}</p>}
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {c.roles.map((r) => (
-                  <span key={r} className={`px-2 py-0.5 rounded-[6px] text-xs font-medium ${roleBadgeClass(r)}`}>
-                    {r}
-                  </span>
+        <div className={loading ? "opacity-60 pointer-events-none" : ""}>
+          {/* Desktop table */}
+          <div className="hidden md:block bg-white rounded-[12px] border border-gray-200 shadow-card overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/50">
+                  {["Name", "Phone", "Email", "Roles", "Orders", "Credits", ""].map((h) => (
+                    <th
+                      key={h}
+                      className="text-left px-4 py-3 font-body text-xs font-semibold text-muted uppercase tracking-wide whitespace-nowrap"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {customers.map((c) => (
+                  <tr
+                    key={c.id}
+                    onClick={() => router.push(`/dashboard/customers/${c.id}`)}
+                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50/60 transition-colors cursor-pointer"
+                  >
+                    <td className="px-4 py-3">
+                      <span className="font-display font-semibold text-agro-dark">{c.name}</span>
+                    </td>
+                    <td className="px-4 py-3 font-body text-sm text-agro-dark">
+                      {c.phone}
+                    </td>
+                    <td className="px-4 py-3 font-body text-sm text-agro-dark">
+                      {c.email ?? <span className="text-muted">—</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {c.roles.map((r) => (
+                          <span
+                            key={r}
+                            className={`px-2 py-0.5 rounded-[6px] text-xs font-medium ${roleBadgeClass(r)}`}
+                          >
+                            {r}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-body text-sm text-agro-dark">
+                      {c._count.orders}
+                    </td>
+                    <td className="px-4 py-3 font-body text-sm text-agro-dark">
+                      {c._count.creditSales}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/dashboard/customers/${c.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-primary text-sm font-medium font-body hover:underline whitespace-nowrap"
+                      >
+                        View →
+                      </Link>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-              <div className="mt-3 flex items-center gap-3 text-xs text-muted">
-                <span>{c._count.orders} order(s)</span>
-                <span>{c._count.creditSales} credit(s)</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+              </tbody>
+            </table>
 
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between gap-3">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={pagination.page <= 1 || loading}
-            className="h-11 px-4 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Previous
-          </button>
-          <p className="font-body text-sm text-muted">
-            Page {pagination.page} of {pagination.totalPages}
-          </p>
-          <button
-            onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-            disabled={pagination.page >= pagination.totalPages || loading}
-            className="h-11 px-4 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Next
-          </button>
+            {/* Pagination inside table container */}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                <p className="font-body text-sm text-muted">
+                  Showing {rangeStart}–{rangeEnd} of {pagination.total} customer{pagination.total !== 1 ? "s" : ""}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={pagination.page <= 1 || loading}
+                    className="h-11 px-4 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                    disabled={pagination.page >= pagination.totalPages || loading}
+                    className="h-11 px-4 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {customers.map((c) => (
+              <Link
+                key={c.id}
+                href={`/dashboard/customers/${c.id}`}
+                className="block bg-white rounded-[12px] border border-gray-200 shadow-card p-4 hover:border-primary hover:shadow-md transition-all"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-display font-semibold text-agro-dark">{c.name}</h3>
+                  <div className="flex flex-wrap gap-1 justify-end">
+                    {c.roles.map((r) => (
+                      <span
+                        key={r}
+                        className={`px-2 py-0.5 rounded-[6px] text-xs font-medium ${roleBadgeClass(r)}`}
+                      >
+                        {r}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <p className="font-body text-xs text-agro-dark mt-1">{c.phone}</p>
+                {c.email && (
+                  <p className="font-body text-xs text-muted">{c.email}</p>
+                )}
+                <div className="mt-3 flex items-center gap-3 text-xs text-muted">
+                  <span>{c._count.orders} order{c._count.orders !== 1 ? "s" : ""}</span>
+                  <span>{c._count.creditSales} credit{c._count.creditSales !== 1 ? "s" : ""}</span>
+                </div>
+              </Link>
+            ))}
+
+            {/* Mobile pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between gap-3 pt-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={pagination.page <= 1 || loading}
+                  className="h-11 px-4 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                <p className="font-body text-sm text-muted">
+                  {rangeStart}–{rangeEnd} of {pagination.total}
+                </p>
+                <button
+                  onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                  disabled={pagination.page >= pagination.totalPages || loading}
+                  className="h-11 px-4 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
