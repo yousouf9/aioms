@@ -1,0 +1,254 @@
+@import "tailwindcss";
+
+/* ─── Agro Hub Brand Tokens ───────────────────────────────────── */
+@theme {
+  /* Colors */
+  --color-agro-dark:     #1B2631;
+  --color-agro-deep:     #1F2D3A;
+  --color-slate-mid:     #212F3D;
+  --color-slate-border:  #2C3E50;
+  --color-primary:       #43A047;
+  --color-primary-dark:  #2E7D32;
+  --color-primary-light: #66BB6A;
+  --color-accent:        #FF8F00;
+  --color-accent-dark:   #E65100;
+  --color-frost-white:   #FAFAFA;
+  --color-muted:         #95A5A6;
+  --color-muted-dark:    #7F8C8D;
+
+  /* Semantic status colors */
+  --color-status-confirmed: #22C55E;
+  --color-status-pending:   #F59E0B;
+  --color-status-cancelled: #EF4444;
+  --color-status-info:      #3B82F6;
+
+  /* Typography */
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body:    "Inter", sans-serif;
+
+  /* Border radius */
+  --radius-card:   12px;
+  --radius-button: 8px;
+  --radius-input:  8px;
+  --radius-badge:  6px;
+
+  /* Shadows */
+  --shadow-card:  0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-glow:  0 0 20px rgb(67 160 71 / 0.15);
+  --shadow-modal: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+}
+
+/* ─── Base Styles ───────────────────────────────────────────── */
+:root {
+  --background: var(--color-frost-white);
+  --foreground: var(--color-agro-dark);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-slate-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-muted-dark); }
+
+/* ─── Utility: Frosted Glass ────────────────────────────────── */
+.glass {
+  background: rgb(255 255 255 / 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgb(255 255 255 / 0.12);
+}
+
+.glass-dark {
+  background: rgb(27 38 49 / 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgb(255 255 255 / 0.06);
+}
+
+/* ─── Utility: Primary Glow ────────────────────────────────── */
+.glow-primary {
+  box-shadow: var(--shadow-glow);
+}
+
+/* ─── Homepage Animations ───────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgb(67 160 71 / 0.15); }
+  50%      { box-shadow: 0 0 40px rgb(67 160 71 / 0.35), 0 0 80px rgb(67 160 71 / 0.1); }
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-up       { animation: fade-up 0.7s ease-out both; }
+.animate-fade-in       { animation: fade-in 0.6s ease-out both; }
+.animate-slide-left    { animation: slide-in-left 0.7s ease-out both; }
+.animate-slide-right   { animation: slide-in-right 0.7s ease-out both; }
+.animate-float         { animation: float 6s ease-in-out infinite; }
+.animate-pulse-glow    { animation: pulse-glow 3s ease-in-out infinite; }
+.animate-gradient      { animation: gradient-shift 8s ease infinite; background-size: 200% 200%; }
+.animate-ticker        { animation: ticker 30s linear infinite; }
+.animate-count-up      { animation: count-up 0.5s ease-out both; }
+.animate-shimmer       { animation: shimmer 3s ease-in-out infinite; background-size: 200% 100%; }
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-800 { animation-delay: 800ms; }
+
+/* Gradient text utility */
+.text-gradient {
+  background: linear-gradient(135deg, #43A047 0%, #66BB6A 50%, #43A047 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.15), 0 0 20px rgb(67 160 71 / 0.08);
+}
+
+/* Product image hover zoom */
+.img-hover-zoom {
+  overflow: hidden;
+}
+.img-hover-zoom img {
+  transition: transform 0.5s ease;
+}
+.img-hover-zoom:hover img {
+  transform: scale(1.06);
+}
+
+/* Divider glow line */
+.glow-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(67 160 71 / 0.4), transparent);
+}
+
+/* ─── Micro-interactions ───────────────────────────────────── */
+
+/* Enhanced focus ring for inputs & interactive elements */
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 0 0 3px rgb(67 160 71 / 0.15);
+}
+
+/* Button press effect — apply via .btn-press or globally on primary buttons */
+.btn-press {
+  transition: transform 0.15s ease, box-shadow 0.3s ease, background-color 0.2s ease;
+}
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Mobile menu slide animation */
+.mobile-menu-enter {
+  animation: menu-slide-down 0.25s ease-out both;
+}
+
+@keyframes menu-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Announcement ticker bar */
+.ticker-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ticker-content {
+  display: inline-flex;
+  animation: ticker 30s linear infinite;
+}
+.ticker-content:hover {
+  animation-play-state: paused;
+}
+
+/* Branded empty placeholder */
+.placeholder-branded {
+  background: linear-gradient(135deg, #f0fdf0 0%, #fafafa 50%, #f0f9ff 100%);
+}
+
+/* Product badge */
+.badge-new {
+  background: linear-gradient(135deg, #43A047, #66BB6A);
+  color: white;
+}
+.badge-popular {
+  background: linear-gradient(135deg, #FF8F00, #FFB300);
+  color: white;
+}
+
+/* ─── Dashboard layout vars ─────────────────────────────────── */
+:root {
+  --sidebar-width: 260px;
+  --topbar-height: 64px;
+}

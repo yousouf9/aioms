@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" fill="none">
+  <!-- Football pitch lines subtle background element -->
+  <g opacity="0.08">
+    <!-- Center circle -->
+    <circle cx="110" cy="30" r="28" stroke="#00C67F" stroke-width="1.2" fill="none"/>
+    <!-- Center line -->
+    <line x1="110" y1="2" x2="110" y2="58" stroke="#00C67F" stroke-width="1.2"/>
+    <!-- Center dot -->
+    <circle cx="110" cy="30" r="2" fill="#00C67F"/>
+  </g>
+
+  <!-- Letter T in emerald green -->
+  <g fill="#00C67F">
+    <rect x="8" y="12" width="42" height="7" rx="1.5"/>
+    <rect x="22" y="12" width="9" height="38" rx="1.5"/>
+  </g>
+
+  <!-- Letter U -->
+  <g fill="#0A0F1E">
+    <rect x="58" y="12" width="9" height="32" rx="1.5"/>
+    <rect x="83" y="12" width="9" height="32" rx="1.5"/>
+    <rect x="58" y="38" width="34" height="9" rx="4.5"/>
+  </g>
+
+  <!-- Letter R -->
+  <g fill="#0A0F1E">
+    <rect x="102" y="12" width="9" height="38" rx="1.5"/>
+    <rect x="102" y="12" width="30" height="7" rx="1.5"/>
+    <rect x="125" y="12" width="9" height="16" rx="1.5"/>
+    <rect x="102" y="26" width="30" height="7" rx="1.5"/>
+    <!-- R leg (diagonal simulated with a rotated rect) -->
+    <polygon points="118,33 127,33 137,50 128,50"/>
+  </g>
+
+  <!-- Letter F -->
+  <g fill="#0A0F1E">
+    <rect x="144" y="12" width="9" height="38" rx="1.5"/>
+    <rect x="144" y="12" width="32" height="7" rx="1.5"/>
+    <rect x="144" y="27" width="26" height="7" rx="1.5"/>
+  </g>
+
+  <!-- Small football icon -->
+  <g transform="translate(188, 10)">
+    <circle cx="10" cy="10" r="9" fill="none" stroke="#00C67F" stroke-width="1.6"/>
+    <!-- Pentagon pattern on ball -->
+    <polygon points="10,3.5 13.5,6.5 12.2,10.8 7.8,10.8 6.5,6.5" fill="none" stroke="#00C67F" stroke-width="1"/>
+    <!-- Lines from pentagon to edge -->
+    <line x1="10" y1="3.5" x2="10" y2="1" stroke="#00C67F" stroke-width="0.8"/>
+    <line x1="13.5" y1="6.5" x2="18" y2="5" stroke="#00C67F" stroke-width="0.8"/>
+    <line x1="12.2" y1="10.8" x2="16.5" y2="14.5" stroke="#00C67F" stroke-width="0.8"/>
+    <line x1="7.8" y1="10.8" x2="3.5" y2="14.5" stroke="#00C67F" stroke-width="0.8"/>
+    <line x1="6.5" y1="6.5" x2="2" y2="5" stroke="#00C67F" stroke-width="0.8"/>
+  </g>
+
+  <!-- Tagline -->
+  <text x="188" y="40" font-family="'Segoe UI', Arial, sans-serif" font-size="5.5" fill="#0A0F1E" letter-spacing="1.5" font-weight="500">MBM</text>
+  <text x="183" y="48" font-family="'Segoe UI', Arial, sans-serif" font-size="5.5" fill="#0A0F1E" letter-spacing="1.5" font-weight="500">STRIKERS</text>
+</svg>

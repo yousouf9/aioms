@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 40" fill="none">
+  <!-- Leaf icon -->
+  <path d="M12 8c0 0-4 6-4 14s4 14 4 14" stroke="#43A047" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M12 8c4 3 10 8 10 14s-6 11-10 14" fill="#43A047" opacity="0.9"/>
+  <path d="M12 8c-2 4-2 10 0 14 2 4 2 10 0 14" fill="#66BB6A" opacity="0.6"/>
+  <circle cx="12" cy="22" r="2" fill="#FAFAFA"/>
+  <!-- Brand text -->
+  <text x="30" y="28" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="20" fill="#FAFAFA">
+    <tspan fill="#43A047">Agro</tspan> Hub
+  </text>
+</svg>
