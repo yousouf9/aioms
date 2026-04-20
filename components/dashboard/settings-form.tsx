@@ -135,7 +135,7 @@ export function SettingsForm({ settings }: Props) {
               type="email"
               value={form.email}
               onChange={(e) => set("email", e.target.value)}
-              placeholder="info@agrohub.com.ng"
+              placeholder="info@nakowa.com.ng"
               className="w-full h-11 px-3 rounded-[8px] bg-white border border-gray-200 text-agro-dark font-body text-sm focus:outline-none focus:border-primary transition-colors"
             />
           </div>

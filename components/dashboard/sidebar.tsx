@@ -20,6 +20,7 @@ import {
   Handshake,
   ArrowRightLeft,
   Store,
+  Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavProgress } from "./nav-progress";
@@ -43,6 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard/customers", label: "Customers", icon: UserCheck, resource: "customers" },
   { href: "/dashboard/credit", label: "Credit & Debt", icon: CreditCard, resource: "credit" },
   { href: "/dashboard/aggregators", label: "Aggregators", icon: Handshake, resource: "aggregators" },
+  { href: "/dashboard/suppliers", label: "Suppliers", icon: Truck, resource: "inventory" },
   { href: "/dashboard/payments", label: "Payments", icon: CreditCard, resource: "payments" },
   { href: "/dashboard/announcements", label: "Announcements", icon: Megaphone, resource: "announcements" },
   { href: "/dashboard/reports", label: "Reports", icon: BarChart2, resource: "reports" },
@@ -140,7 +142,7 @@ export function Sidebar({ session, open, onClose }: SidebarProps) {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-[260px] flex-shrink-0 flex-col bg-slate-mid border-r border-slate-border h-full">
         <div className="h-16 flex items-center px-6 border-b border-slate-border flex-shrink-0">
-          <Image src="/logo-light.svg" alt="Agro Hub" width={120} height={28} className="h-7 w-auto" />
+          <Image src="/logo-light.svg" alt="Nakowa" width={120} height={28} className="h-7 w-auto" />
         </div>
         {navContent}
       </aside>
@@ -154,7 +156,7 @@ export function Sidebar({ session, open, onClose }: SidebarProps) {
           />
           <aside className="absolute left-0 top-0 bottom-0 w-[260px] flex flex-col bg-slate-mid border-r border-slate-border">
             <div className="h-16 flex items-center justify-between px-6 border-b border-slate-border flex-shrink-0">
-              <Image src="/logo-light.svg" alt="Agro Hub" width={120} height={28} className="h-7 w-auto" />
+              <Image src="/logo-light.svg" alt="Nakowa" width={120} height={28} className="h-7 w-auto" />
               <button
                 onClick={onClose}
                 className="p-1 text-muted hover:text-frost-white transition-colors"

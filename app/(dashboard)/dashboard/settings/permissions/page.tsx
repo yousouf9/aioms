@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { getPermissionsForRole } from "@/lib/permissions";
 import { db } from "@/lib/db";
 import { PermissionsEditor } from "@/components/dashboard/permissions-editor";
 import Link from "next/link";
@@ -8,9 +9,11 @@ import type { PermissionMatrix } from "@/types";
 
 export default async function PermissionsPage() {
   const session = await getSession();
-  if (!session || session.role !== "SUPER_ADMIN") {
-    redirect("/dashboard");
-  }
+  if (!session) redirect("/login");
+  const userPerms = await getPermissionsForRole(session.role);
+  if (!userPerms.settings.view) redirect("/dashboard");
+
+  const isSuperAdmin = session.role === "SUPER_ADMIN";
 
   const rows = await db.role.findMany({
     orderBy: { sortOrder: "asc" },
@@ -49,7 +52,14 @@ export default async function PermissionsPage() {
         </div>
       </div>
 
-      <PermissionsEditor initialData={serialized} />
+      {!isSuperAdmin && (
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-[8px] px-4 py-2.5">
+          <p className="font-body text-xs text-blue-700">
+            You can view role permissions but only a Super Admin can make changes.
+          </p>
+        </div>
+      )}
+      <PermissionsEditor initialData={serialized} readOnly={!isSuperAdmin} />
     </div>
   );
 }

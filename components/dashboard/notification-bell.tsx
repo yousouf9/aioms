@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bell, X, CheckCheck } from "lucide-react";
+import { Bell, X, CheckCheck, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Notification = {
@@ -133,6 +133,29 @@ export function NotificationBell() {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   }
 
+  async function dismissOne(id: string) {
+    await fetch("/api/dashboard/notifications", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [id] }),
+    });
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    setUnread((prev) => {
+      const wasDismissedUnread = notifications.find((n) => n.id === id && !n.isRead);
+      return wasDismissedUnread ? Math.max(0, prev - 1) : prev;
+    });
+  }
+
+  async function dismissAll() {
+    await fetch("/api/dashboard/notifications", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ all: true }),
+    });
+    setNotifications([]);
+    setUnread(0);
+  }
+
   return (
     <div className="relative" ref={panelRef}>
       <button
@@ -169,6 +192,16 @@ export function NotificationBell() {
                   All read
                 </button>
               )}
+              {notifications.length > 0 && (
+                <button
+                  onClick={dismissAll}
+                  className="h-7 px-2 flex items-center gap-1 text-xs font-body text-muted hover:text-red-500 hover:bg-red-50 rounded-[6px] transition-colors"
+                  title="Clear all notifications"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Clear
+                </button>
+              )}
               <button
                 onClick={() => setOpen(false)}
                 className="h-7 w-7 flex items-center justify-center text-muted hover:text-agro-dark hover:bg-gray-100 rounded-[6px] transition-colors"
@@ -193,18 +226,24 @@ export function NotificationBell() {
               notifications.map((n) => (
                 <div
                   key={n.id}
-                  className={cn(
-                    "px-4 py-3",
-                    !n.isRead && "bg-blue-50/50"
-                  )}
+                  className={cn("px-4 py-3 group relative", !n.isRead && "bg-blue-50/50")}
                 >
-                  <div className="flex items-start gap-2.5">
-                    <span className={cn("mt-0.5 text-xs font-body font-medium px-1.5 py-0.5 rounded-[4px] shrink-0 whitespace-nowrap", TYPE_COLORS[n.type] ?? "bg-gray-100 text-muted")}>
-                      {n.type.replace("_", " ")}
-                    </span>
-                    {!n.isRead && (
-                      <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
-                    )}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                      <span className={cn("mt-0.5 text-xs font-body font-medium px-1.5 py-0.5 rounded-[4px] shrink-0 whitespace-nowrap", TYPE_COLORS[n.type] ?? "bg-gray-100 text-muted")}>
+                        {n.type.replace(/_/g, " ")}
+                      </span>
+                      {!n.isRead && (
+                        <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
+                      )}
+                    </div>
+                    <button
+                      onClick={() => dismissOne(n.id)}
+                      className="opacity-0 group-hover:opacity-100 h-6 w-6 flex items-center justify-center rounded text-muted hover:text-red-500 hover:bg-red-50 transition-all shrink-0"
+                      title="Dismiss"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </div>
                   <p className="font-body text-sm font-medium text-agro-dark mt-1">{n.title}</p>
                   <p className="font-body text-xs text-muted mt-0.5 leading-relaxed">{n.message}</p>

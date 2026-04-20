@@ -31,6 +31,40 @@ export const RESOURCE_LABELS: Record<PermissionResource, string> = {
   attendance: "Attendance",
 };
 
+// Hardcoded fallback permissions for system roles — used when DB permissions are missing or incomplete
+const SYSTEM_ROLE_DEFAULTS: Record<string, Partial<PermissionMatrix>> = {
+  MANAGER: {
+    orders: { view: true, create: true, update: true, delete: false },
+    sales: { view: true, create: true, update: true, delete: false },
+    payments: { view: true, create: true, update: true, delete: false },
+    inventory: { view: true, create: true, update: true, delete: true },
+    warehouses: { view: true, create: true, update: true, delete: true },
+    credit: { view: true, create: true, update: true, delete: false },
+    aggregators: { view: true, create: true, update: true, delete: false },
+    customers: { view: true, create: true, update: true, delete: false },
+    staff: { view: true, create: false, update: false, delete: false },
+    announcements: { view: true, create: true, update: true, delete: true },
+    reports: { view: true, create: false, update: false, delete: false },
+    settings: { view: true, create: false, update: true, delete: false },
+    attendance: { view: true, create: true, update: false, delete: false },
+  },
+  CASHIER: {
+    orders: { view: true, create: true, update: true, delete: false },
+    sales: { view: true, create: true, update: false, delete: false },
+    payments: { view: true, create: true, update: false, delete: false },
+    inventory: { view: true, create: false, update: false, delete: false },
+    warehouses: { view: true, create: false, update: false, delete: false },
+    credit: { view: true, create: true, update: false, delete: false },
+    aggregators: { view: false, create: false, update: false, delete: false },
+    customers: { view: true, create: true, update: true, delete: false },
+    staff: { view: false, create: false, update: false, delete: false },
+    announcements: { view: true, create: false, update: false, delete: false },
+    reports: { view: false, create: false, update: false, delete: false },
+    settings: { view: false, create: false, update: false, delete: false },
+    attendance: { view: true, create: true, update: false, delete: false },
+  },
+};
+
 // ─── In-memory cache (single-server, 60s TTL) ──────────────────────────────
 
 const cache = new Map<string, { data: PermissionMatrix; fetchedAt: number }>();
@@ -71,11 +105,19 @@ export async function getPermissionsForRole(role: string): Promise<PermissionMat
   }
 
   const row = await db.role.findUnique({ where: { name: role } });
+  const defaults = SYSTEM_ROLE_DEFAULTS[role];
+
   if (!row || !row.permissions) {
-    return allFalse();
+    const fallback = defaults ? { ...allFalse(), ...defaults } as PermissionMatrix : allFalse();
+    cache.set(role, { data: fallback, fetchedAt: Date.now() });
+    return fallback;
   }
 
-  const data = row.permissions as PermissionMatrix;
+  // Merge DB permissions with defaults — DB values take precedence per resource
+  const dbPerms = row.permissions as PermissionMatrix;
+  const data = defaults
+    ? { ...defaults, ...dbPerms } as PermissionMatrix
+    : dbPerms;
   cache.set(role, { data, fetchedAt: Date.now() });
   return data;
 }

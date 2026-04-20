@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { X, Phone, MessageCircle } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { CreditSale } from "@/components/dashboard/credit-manager";
 
@@ -170,11 +170,12 @@ export function CreditDetailActions({ credit, warehouses, shops }: Props) {
   const canPay = credit.status !== "PAID" && credit.status !== "RETURNED";
   const canReturn = !credit.returnedToInventory && credit.status !== "PAID" && credit.status !== "RETURNED";
 
-  if (!canPay && !canReturn) return null;
+  const phone = credit.customer.phone?.replace(/\D/g, "") ?? "";
+  const whatsappText = encodeURIComponent(`Hello ${credit.customer.name}, this is a reminder about your outstanding balance of ₦${(credit.totalAmount - credit.paidAmount).toLocaleString("en-NG", { minimumFractionDigits: 2 })} with Nakowa. Kindly make arrangements to settle. Thank you.`);
 
   return (
     <>
-      <div className="flex gap-3 pb-8">
+      <div className="flex flex-wrap gap-3 pb-8">
         {canPay && (
           <button
             onClick={() => setShowPayment(true)}
@@ -190,6 +191,26 @@ export function CreditDetailActions({ credit, warehouses, shops }: Props) {
           >
             Return to Inventory
           </button>
+        )}
+        {phone && (
+          <a
+            href={`tel:${phone}`}
+            className="h-11 px-4 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+          >
+            <Phone className="h-4 w-4 text-muted" />
+            Call
+          </a>
+        )}
+        {phone && (
+          <a
+            href={`https://wa.me/${phone}?text=${whatsappText}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-11 px-4 rounded-[8px] border border-green-200 bg-green-50 text-green-700 font-body text-sm hover:bg-green-100 transition-colors flex items-center gap-1.5"
+          >
+            <MessageCircle className="h-4 w-4" />
+            WhatsApp
+          </a>
         )}
       </div>
 

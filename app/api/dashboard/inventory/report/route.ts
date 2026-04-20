@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
       return new Response(summaryLines.join("\n"), {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
-          "Content-Disposition": `attachment; filename="agrohub-inventory-report-${new Date().toISOString().split("T")[0]}.csv"`,
+          "Content-Disposition": `attachment; filename="nakowa-inventory-report-${new Date().toISOString().split("T")[0]}.csv"`,
         },
       });
     }

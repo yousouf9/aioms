@@ -21,11 +21,11 @@ export default async function AboutPage() {
             <span className="text-xs text-primary font-medium">Lafia, Nasarawa State</span>
           </div>
           <h1 className="font-display font-bold text-3xl sm:text-4xl text-frost-white mb-4">
-            About <span className="text-primary">Agro Hub</span>
+            About <span className="text-primary">Nakowa</span>
           </h1>
           <p className="text-frost-white/70 leading-relaxed">
             {settings?.aboutText ??
-              "Agro Hub is a leading agricultural supplies business in Nasarawa State, Nigeria. We provide quality herbicides, pesticides, fertilizers, seeds, grains, tillers, sprayers, and farming equipment to farmers and agribusinesses across the region."}
+              "Nakowa is a leading agricultural supplies business in Nasarawa State, Nigeria. We provide quality herbicides, pesticides, fertilizers, seeds, grains, tillers, sprayers, and farming equipment to farmers and agribusinesses across the region."}
           </p>
         </div>
       </div>
@@ -104,9 +104,7 @@ export default async function AboutPage() {
           </div>
           <div className="space-y-0">
             {[
-              { day: "Monday - Friday", time: "8:00 AM - 6:00 PM" },
-              { day: "Saturday", time: "8:00 AM - 4:00 PM" },
-              { day: "Sunday", time: "Closed" },
+              { day: "Every Day", time: "7:00 AM - 6:00 PM" },
             ].map(({ day, time }) => (
               <div key={day} className="flex items-center justify-between gap-3 py-3 border-b border-gray-100 last:border-0">
                 <span className="text-sm text-muted-dark">{day}</span>

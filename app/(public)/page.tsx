@@ -240,7 +240,7 @@ export default async function HomePage() {
                 <span className="text-primary text-xs font-medium">Aggregator Program</span>
               </div>
               <h2 className="font-display text-2xl md:text-3xl font-bold text-frost-white mb-3">
-                Want to Supply Products to Agro Hub?
+                Want to Supply Products to Nakowa?
               </h2>
               <p className="text-muted text-sm md:text-base mb-6 leading-relaxed">
                 Join our aggregator network and supply grains, beans, rice, maize, and other agricultural
@@ -252,7 +252,7 @@ export default async function HomePage() {
                   className="flex items-center justify-center gap-2 h-14 px-8 rounded-[8px] bg-primary text-white font-display font-semibold hover:bg-primary-dark transition-colors"
                 >
                   <UserPlus className="h-5 w-5" />
-                  Become an Aggregator
+                  Become a Customer
                 </Link>
                 <Link
                   href="/aggregator"

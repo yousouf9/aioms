@@ -10,6 +10,7 @@ import {
   ArrowDownCircle,
   ArrowRightLeft,
   CheckCircle2,
+  Search,
 } from "lucide-react";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 
@@ -97,6 +98,7 @@ export function WarehouseDetailTabs({
   const [showAddStock, setShowAddStock] = useState(false);
   const [adjustStock, setAdjustStock] = useState<{ stock: StockRow; defaultType: "IN" | "OUT" } | null>(null);
   const [showNewTransfer, setShowNewTransfer] = useState(false);
+  const [stockSearch, setStockSearch] = useState("");
 
   const router = useRouter();
 
@@ -144,19 +146,31 @@ export function WarehouseDetailTabs({
             <h2 className="font-display text-lg font-bold text-agro-dark">
               Stock in {warehouse.name}
             </h2>
-            <button
-              onClick={() => setShowAddStock(true)}
-              className="flex items-center gap-2 h-11 px-4 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50 transition-colors self-start sm:self-auto"
-            >
-              <Plus className="h-4 w-4" />
-              Add Product to Warehouse
-            </button>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted pointer-events-none" />
+                <input
+                  type="text"
+                  value={stockSearch}
+                  onChange={(e) => setStockSearch(e.target.value)}
+                  placeholder="Search products…"
+                  className="h-11 pl-9 pr-3 w-44 rounded-[8px] border border-gray-200 bg-white font-body text-sm text-agro-dark placeholder:text-muted focus:outline-none focus:border-primary transition-colors"
+                />
+              </div>
+              <button
+                onClick={() => setShowAddStock(true)}
+                className="flex items-center gap-2 h-11 px-4 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Add Product
+              </button>
+            </div>
           </div>
 
           {/* Stats row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <StatCard label="Total Units" value={totalUnits.toLocaleString()} />
-            <StatCard label="Distinct SKUs" value={distinctSkus.toString()} />
+            <StatCard label="Distinct Stock" value={distinctSkus.toString()} />
             <StatCard
               label="Low Stock"
               value={lowStockCount.toString()}
@@ -165,8 +179,17 @@ export function WarehouseDetailTabs({
             <StatCard label="Total Value" value={formatCurrency(totalStockValue)} />
           </div>
 
-          {warehouse.stocks.length === 0 ? (
+          {(() => {
+            const visibleStocks = stockSearch
+              ? warehouse.stocks.filter((s) =>
+                  s.product.name.toLowerCase().includes(stockSearch.toLowerCase()) ||
+                  s.product.category.name.toLowerCase().includes(stockSearch.toLowerCase())
+                )
+              : warehouse.stocks;
+            return warehouse.stocks.length === 0 ? (
             <EmptyState text="No stock yet. Add a product to get started." />
+          ) : visibleStocks.length === 0 ? (
+            <EmptyState text={`No products match "${stockSearch}".`} />
           ) : (
             <>
               {/* Desktop table */}
@@ -185,7 +208,7 @@ export function WarehouseDetailTabs({
                     </tr>
                   </thead>
                   <tbody>
-                    {warehouse.stocks.map((stock) => {
+                    {visibleStocks.map((stock) => {
                       const low = stock.quantity <= stock.product.lowStockThreshold;
                       return (
                         <tr
@@ -253,7 +276,7 @@ export function WarehouseDetailTabs({
 
               {/* Mobile cards */}
               <div className="md:hidden space-y-3">
-                {warehouse.stocks.map((stock) => {
+                {visibleStocks.map((stock) => {
                   const low = stock.quantity <= stock.product.lowStockThreshold;
                   return (
                     <div
@@ -309,7 +332,8 @@ export function WarehouseDetailTabs({
                 })}
               </div>
             </>
-          )}
+          );
+          })()}
         </div>
       )}
 

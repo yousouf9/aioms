@@ -128,7 +128,7 @@ export default function NewOfferPage() {
       </Link>
 
       <h1 className="font-display text-2xl font-bold text-agro-dark mb-1">Submit an Offer</h1>
-      <p className="text-muted-dark text-sm mb-8">Propose to supply an agricultural product to Agro Hub</p>
+      <p className="text-muted-dark text-sm mb-8">Propose to supply an agricultural product to Nakowa</p>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-[12px] border border-gray-200 shadow-card p-6 space-y-5">
         <div>

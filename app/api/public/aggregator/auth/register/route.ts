@@ -7,7 +7,7 @@ import { sendAggregatorVerifyEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, phone, email, password, address, profileImageUrl } = await request.json();
+    const { name, phone, email, password, address, profileImageUrl, customerType } = await request.json();
 
     if (!name?.trim() || !phone?.trim() || !email?.trim() || !password) {
       return NextResponse.json(
@@ -38,11 +38,15 @@ export async function POST(request: NextRequest) {
     const verifyToken = crypto.randomInt(100000, 999999).toString();
     const verifyExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
+    // Map customerType to CustomerRole
+    const primaryRole = customerType === "AGGREGATOR" ? "AGGREGATOR" : "BUYER";
+    const newRole = primaryRole as "AGGREGATOR" | "BUYER";
+
     let customer;
     if (existing) {
-      const roles = existing.roles.includes("AGGREGATOR")
+      const roles = existing.roles.includes(newRole)
         ? existing.roles
-        : [...existing.roles, "AGGREGATOR" as const];
+        : [...existing.roles, newRole];
       customer = await db.customer.update({
         where: { id: existing.id },
         data: {
@@ -66,7 +70,7 @@ export async function POST(request: NextRequest) {
           address: address?.trim() || null,
           profileImageUrl: profileImageUrl || null,
           passwordHash,
-          roles: ["AGGREGATOR"],
+          roles: [newRole],
           isEmailVerified: false,
           emailVerifyToken: verifyToken,
           emailVerifyExpires: verifyExpires,

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Minus, Trash2, ShoppingCart, CheckCircle, Clock } from "lucide-react";
+import { Plus, Minus, Trash2, ShoppingCart, CheckCircle, Clock, Printer, MessageCircle } from "lucide-react";
 import { formatCurrency, cn } from "@/lib/utils";
 import type { StaffSession } from "@/types";
 
@@ -174,6 +174,24 @@ export function POSTerminal({ session, openSession: initialSession, products, re
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function handlePrintReceipt() {
+    if (!lastSale) return;
+    const win = window.open("", "_blank", "width=360,height=600");
+    if (!win) return;
+    const lines = lastSale.items.map((i) => `<tr><td>${i.name} &times; ${i.quantity}</td><td style="text-align:right">&#8358;${i.total.toLocaleString("en-NG", { minimumFractionDigits: 2 })}</td></tr>`).join("");
+    win.document.write(`<!DOCTYPE html><html><head><title>Receipt</title><style>body{font-family:sans-serif;padding:20px;max-width:300px;margin:0 auto}table{width:100%;border-collapse:collapse}td{padding:4px 0}tfoot td{border-top:1px solid #ccc;font-weight:bold;padding-top:8px}.header{text-align:center;margin-bottom:16px}.footer{text-align:center;margin-top:16px;font-size:12px;color:#888}</style></head><body><div class="header"><h2 style="margin:0">Nakowa</h2><p style="margin:4px 0;font-size:12px">${new Date().toLocaleString("en-NG")}</p><p style="margin:4px 0;font-size:12px">Payment: ${lastSale.paymentMethod}</p></div><table><tbody>${lines}</tbody><tfoot><tr><td>Total</td><td style="text-align:right">&#8358;${lastSale.total.toLocaleString("en-NG", { minimumFractionDigits: 2 })}</td></tr></tfoot></table><div class="footer"><p>Thank you for your business!</p></div></body></html>`);
+    win.document.close();
+    win.focus();
+    win.print();
+  }
+
+  function handleWhatsAppShare() {
+    if (!lastSale) return;
+    const lines = lastSale.items.map((i) => `• ${i.name} x${i.quantity} — ₦${i.total.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`).join("\n");
+    const msg = `*Nakowa Receipt*\n${new Date().toLocaleString("en-NG")}\nPayment: ${lastSale.paymentMethod}\n\n${lines}\n\n*Total: ₦${lastSale.total.toLocaleString("en-NG", { minimumFractionDigits: 2 })}*\n\nThank you for your business!`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   }
 
   // No session — show open session prompt
@@ -448,6 +466,22 @@ export function POSTerminal({ session, openSession: initialSession, products, re
               </div>
             </div>
 
+            <div className="flex gap-2 mb-2">
+              <button
+                onClick={handlePrintReceipt}
+                className="flex-1 h-11 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Printer className="h-4 w-4" />
+                Print
+              </button>
+              <button
+                onClick={handleWhatsAppShare}
+                className="flex-1 h-11 rounded-[8px] border border-green-200 bg-green-50 text-green-700 font-body text-sm hover:bg-green-100 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Share
+              </button>
+            </div>
             <button
               onClick={() => setShowReceipt(false)}
               className="w-full h-11 rounded-[8px] bg-primary text-agro-dark font-display font-semibold hover:bg-primary/90 transition-colors"

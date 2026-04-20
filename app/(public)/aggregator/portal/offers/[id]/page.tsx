@@ -311,7 +311,7 @@ export default function OfferDetailPage() {
 
           {offer.status === "ACCEPTED" && (
             <p className="text-xs text-green-600 italic flex items-center gap-1.5 py-2 font-medium">
-              <CheckCircle className="h-3.5 w-3.5" /> Offer accepted — waiting for Agro Hub to send agreement document
+              <CheckCircle className="h-3.5 w-3.5" /> Offer accepted — waiting for Nakowa to send agreement document
             </p>
           )}
 
@@ -335,7 +335,7 @@ export default function OfferDetailPage() {
 
           {offer.status === "AGREEMENT_UPLOADED" && (
             <p className="text-xs text-orange-600 italic flex items-center gap-1.5 py-2 font-medium">
-              <FileCheck className="h-3.5 w-3.5" /> Signed agreement uploaded — waiting for Agro Hub to review and approve
+              <FileCheck className="h-3.5 w-3.5" /> Signed agreement uploaded — waiting for Nakowa to review and approve
             </p>
           )}
 
@@ -351,7 +351,7 @@ export default function OfferDetailPage() {
 
           {offer.status === "AGREEMENT_SIGNED" && (
             <p className="text-xs text-purple-600 italic flex items-center gap-1.5 py-2 font-medium">
-              <Truck className="h-3.5 w-3.5" /> Agreement signed — delivering goods to Agro Hub
+              <Truck className="h-3.5 w-3.5" /> Agreement signed — delivering goods to Nakowa
             </p>
           )}
 

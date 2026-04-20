@@ -1,7 +1,7 @@
 const ZEPTO_TOKEN = process.env.ZEPTOMAIL_TOKEN ?? "";
 const ZEPTO_URL = "https://api.zeptomail.com/v1.1/email";
-const FROM_EMAIL = process.env.EMAIL_FROM ?? "noreply@agrohub.com";
-const FROM_NAME = process.env.EMAIL_FROM_NAME ?? "Agro Hub";
+const FROM_EMAIL = process.env.EMAIL_FROM ?? "noreply@nakowa.com.ng";
+const FROM_NAME = process.env.EMAIL_FROM_NAME ?? "Nakowa";
 const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP ?? "";
 
 type SendEmailParams = {
@@ -51,7 +51,7 @@ function layout(content: string) {
     <!-- Header -->
     <div style="text-align:center;padding:16px 0;border-bottom:1px solid #2C3E50;">
       <span style="font-size:24px;font-weight:bold;letter-spacing:2px;">
-        <span style="color:#43A047;">Agro</span><span style="color:#FAFAFA;"> Hub</span>
+        <span style="color:#43A047;">Nakowa</span>
       </span>
     </div>
     <!-- Content -->
@@ -60,7 +60,7 @@ function layout(content: string) {
     </div>
     <!-- Footer -->
     <div style="border-top:1px solid #2C3E50;padding:16px 0;text-align:center;">
-      <p style="color:#95A5A6;font-size:12px;margin:0;">Agro Hub — Your Trusted Agricultural Supplies Partner</p>
+      <p style="color:#95A5A6;font-size:12px;margin:0;">Nakowa — Your Trusted Agricultural Supplies Partner</p>
       ${WHATSAPP ? `<p style="margin:8px 0 0;"><a href="https://wa.me/${WHATSAPP}" style="color:#43A047;font-size:12px;text-decoration:none;">Chat with us on WhatsApp</a></p>` : ""}
     </div>
   </div>
@@ -84,7 +84,7 @@ export async function sendStaffWelcomeEmail(params: {
   const roleLabel = roleLabels[params.role] ?? params.role;
 
   const html = layout(`
-    <h2 style="color:#FAFAFA;font-size:20px;margin:0 0 8px;">Welcome to Agro Hub!</h2>
+    <h2 style="color:#FAFAFA;font-size:20px;margin:0 0 8px;">Welcome to Nakowa!</h2>
     <p style="color:#95A5A6;font-size:14px;margin:0 0 20px;">Your staff account has been created. Here are your login details:</p>
     <div style="background:#212F3D;border:1px solid #2C3E50;border-radius:12px;padding:20px;">
       <table style="width:100%;border-collapse:collapse;">
@@ -106,7 +106,7 @@ export async function sendStaffWelcomeEmail(params: {
   await sendEmail({
     to: params.to,
     toName: params.staffName,
-    subject: "Your Agro Hub Staff Account",
+    subject: "Your Nakowa Staff Account",
     htmlBody: html,
   });
 }
@@ -134,7 +134,7 @@ export async function sendPasswordResetEmail(params: {
   await sendEmail({
     to: params.to,
     toName: params.staffName,
-    subject: "Password Reset — Agro Hub",
+    subject: "Password Reset — Nakowa",
     htmlBody: html,
   });
 }
@@ -197,7 +197,7 @@ export async function sendAggregatorVerifyEmail(params: {
 }) {
   const html = layout(`
     <h2 style="color:#FAFAFA;font-size:20px;margin:0 0 8px;">Verify Your Email</h2>
-    <p style="color:#95A5A6;font-size:14px;margin:0 0 20px;">Hi ${params.name}, enter the code below to verify your Agro Hub aggregator account.</p>
+    <p style="color:#95A5A6;font-size:14px;margin:0 0 20px;">Hi ${params.name}, enter the code below to verify your Nakowa aggregator account.</p>
     <div style="background:#212F3D;border:1px solid #2C3E50;border-radius:12px;padding:24px;text-align:center;">
       <p style="color:#95A5A6;font-size:12px;margin:0 0 8px;">Your Verification Code</p>
       <p style="color:#43A047;font-size:36px;font-weight:bold;letter-spacing:8px;margin:0;">${params.code}</p>
@@ -208,7 +208,7 @@ export async function sendAggregatorVerifyEmail(params: {
   await sendEmail({
     to: params.to,
     toName: params.name,
-    subject: "Verify Your Email — Agro Hub",
+    subject: "Verify Your Email — Nakowa",
     htmlBody: html,
   });
 }
@@ -221,7 +221,7 @@ export async function sendAggregatorPasswordReset(params: {
 }) {
   const html = layout(`
     <h2 style="color:#FAFAFA;font-size:20px;margin:0 0 8px;">Password Reset Code</h2>
-    <p style="color:#95A5A6;font-size:14px;margin:0 0 20px;">Hi ${params.name}, use the code below to reset your Agro Hub aggregator account password.</p>
+    <p style="color:#95A5A6;font-size:14px;margin:0 0 20px;">Hi ${params.name}, use the code below to reset your Nakowa aggregator account password.</p>
     <div style="background:#212F3D;border:1px solid #2C3E50;border-radius:12px;padding:24px;text-align:center;">
       <p style="color:#95A5A6;font-size:12px;margin:0 0 8px;">Your Reset Code</p>
       <p style="color:#43A047;font-size:36px;font-weight:bold;letter-spacing:8px;margin:0;">${params.resetCode}</p>
@@ -232,7 +232,7 @@ export async function sendAggregatorPasswordReset(params: {
   await sendEmail({
     to: params.to,
     toName: params.name,
-    subject: "Password Reset Code — Agro Hub",
+    subject: "Password Reset Code — Nakowa",
     htmlBody: html,
   });
 }
@@ -318,7 +318,7 @@ export async function sendAggregatorOfferUpdate(params: {
     COMPLETED: {
       subject: `Offer completed — ${params.productName}`,
       heading: "Your offer is now complete",
-      body: "All deliveries and payments on this offer have been finalised. Thank you for supplying through Agro Hub — we look forward to working with you again.",
+      body: "All deliveries and payments on this offer have been finalised. Thank you for supplying through Nakowa — we look forward to working with you again.",
       cta: "View Offer",
     },
   };
@@ -341,7 +341,7 @@ export async function sendAggregatorOfferUpdate(params: {
   await sendEmail({
     to: params.to,
     toName: params.name,
-    subject: `${subject} — Agro Hub`,
+    subject: `${subject} — Nakowa`,
     htmlBody: html,
   });
 }
@@ -352,7 +352,7 @@ export async function sendAggregatorWelcome(params: {
   name: string;
 }) {
   const html = layout(`
-    <h2 style="color:#FAFAFA;font-size:20px;margin:0 0 8px;">Welcome to Agro Hub!</h2>
+    <h2 style="color:#FAFAFA;font-size:20px;margin:0 0 8px;">Welcome to Nakowa!</h2>
     <p style="color:#95A5A6;font-size:14px;margin:0 0 20px;">Hi ${params.name}, your aggregator account has been created successfully.</p>
     <div style="background:#212F3D;border:1px solid #2C3E50;border-radius:12px;padding:20px;">
       <p style="color:#FAFAFA;font-size:14px;margin:0 0 12px;">With your account you can:</p>
@@ -371,7 +371,7 @@ export async function sendAggregatorWelcome(params: {
   await sendEmail({
     to: params.to,
     toName: params.name,
-    subject: "Welcome to Agro Hub — Aggregator Portal",
+    subject: "Welcome to Nakowa — Aggregator Portal",
     htmlBody: html,
   });
 }

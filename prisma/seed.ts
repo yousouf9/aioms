@@ -39,7 +39,7 @@ const CASHIER_PERMISSIONS = {
 };
 
 async function main() {
-  console.log("Seeding Agro Hub database...");
+  console.log("Seeding Nakowa database...");
 
   // ─── System Roles ────────────────────────────────────────────
   const systemRoles = [
@@ -51,14 +51,14 @@ async function main() {
   for (const role of systemRoles) {
     await db.role.upsert({
       where: { name: role.name },
-      update: {},
+      update: role.permissions !== Prisma.JsonNull ? { permissions: role.permissions } : {},
       create: { ...role, isSystem: true },
     });
   }
   console.log("  Roles seeded (3 roles)");
 
   // ─── Default SUPER_ADMIN ──────────────────────────────────
-  const adminEmail = "admin@agrohub.com";
+  const adminEmail = "admin@nakowa.com.ng";
   const existing = await db.user.findUnique({ where: { email: adminEmail } });
 
   if (!existing) {
@@ -82,17 +82,15 @@ async function main() {
     update: {},
     create: {
       id: "default",
-      businessName: "Agro Hub",
-      phone: "+234 000 000 0000",
-      whatsapp: "2340000000000",
-      email: "info@agrohub.com",
-      address: "Lafia, Nasarawa State, Nigeria",
+      businessName: "Nakowa",
+      phone: "+2348088666857",
+      whatsapp: "2348030616849",
+      email: "info@nakowa.com.ng",
+      address: "No. 42 behind Romantic Bakery, Anguwan Jaba, Lafia, Nasarawa State, Nigeria",
       aboutText: "Your trusted source for quality agricultural supplies — herbicides, fertilizers, machinery, seeds, and grains.",
       deliveryFee: 0,
       openingHours: {
-        "Mon-Fri": "8:00 AM - 6:00 PM",
-        "Sat": "8:00 AM - 4:00 PM",
-        "Sun": "Closed",
+        "Every Day": "7:00 AM - 6:00 PM",
       },
     },
   });

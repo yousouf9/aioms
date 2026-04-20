@@ -27,8 +27,7 @@ export async function GET(request: NextRequest) {
       topProducts,
       attendanceSummary,
       staffSales,
-      creditStats,
-      overdueCredits,
+      creditSalesGrouped,
     ] = await Promise.all([
       db.payment.aggregate({
         where: { status: "PAID", source: "ORDER", confirmedAt: { gte: since } },
@@ -76,13 +75,10 @@ export async function GET(request: NextRequest) {
           cashier: { select: { name: true, roleName: true } },
         },
       }),
-      db.creditSale.aggregate({
+      db.creditSale.groupBy({
+        by: ["status"],
         where: { createdAt: { gte: since } },
-        _sum: { totalAmount: true, paidAmount: true },
         _count: true,
-      }),
-      db.creditSale.count({
-        where: { status: { in: ["OVERDUE", "DEFAULTED"] } },
       }),
     ]);
 
@@ -144,15 +140,10 @@ export async function GET(request: NextRequest) {
         breakdown: {
           orders: { total: orderRevenue._sum.amount?.toNumber() ?? 0, count: orderRevenue._count },
           sales: { total: salesRevenue._sum.amount?.toNumber() ?? 0, count: salesRevenue._count },
-          creditPayments: { total: creditRevenue._sum.amount?.toNumber() ?? 0, count: creditRevenue._count },
+          credit: { total: creditRevenue._sum.amount?.toNumber() ?? 0, count: creditRevenue._count },
         },
         orderStats: Object.fromEntries(orders.map((o) => [o.status, o._count])),
-        creditSummary: {
-          totalIssued: creditStats._sum.totalAmount?.toNumber() ?? 0,
-          totalCollected: creditStats._sum.paidAmount?.toNumber() ?? 0,
-          count: creditStats._count,
-          overdueCount: overdueCredits,
-        },
+        creditStats: Object.fromEntries(creditSalesGrouped.map((c) => [c.status, c._count])),
         dailyRevenue,
         topProducts: topProducts.map((p) => ({
           name: productMap[p.productId] ?? "Unknown",

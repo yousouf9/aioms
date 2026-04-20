@@ -41,7 +41,7 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
           <div>
-            <Image src="/logo-light.svg" alt="Agro Hub" width={140} height={32} className="h-8 w-auto" />
+            <Image src="/logo-light.svg" alt="Nakowa" width={140} height={32} className="h-8 w-auto" />
             <p className="font-body text-sm text-muted mt-2 leading-relaxed">
               Your trusted source for quality agricultural supplies — herbicides, fertilizers, machinery, seeds, and grains.
             </p>
@@ -71,7 +71,7 @@ export function Footer() {
             <ul className="space-y-2">
               {[
                 { href: "/products",      label: "Browse Products" },
-                { href: "/aggregator",    label: "Become an Aggregator" },
+                { href: "/aggregator",    label: "Become a Customer" },
                 { href: "/announcements",  label: "Announcements" },
                 { href: "/track-order",    label: "Track My Order" },
                 { href: "/about",          label: "About Us" },
@@ -95,22 +95,20 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-2.5">
                 <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                <span className="font-body text-sm text-muted">Lafia, Nasarawa State, Nigeria</span>
+                <span className="font-body text-sm text-muted">No. 42 behind Romantic Bakery, Anguwan Jaba, Lafia, Nasarawa State, Nigeria</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="h-4 w-4 text-primary shrink-0" />
-                <span className="font-body text-sm text-muted">Contact us for details</span>
+                <span className="font-body text-sm text-muted">+2348088666857</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
-                <span className="font-body text-sm text-muted">info@agrohub.com</span>
+                <span className="font-body text-sm text-muted">info@nakowa.com.ng</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <Clock className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <span className="font-body text-sm text-muted">
-                  Mon–Fri: 8:00 AM – 6:00 PM<br />
-                  Sat: 8:00 AM – 4:00 PM<br />
-                  Sun: Closed
+                  Every Day: 7:00 AM – 6:00 PM
                 </span>
               </li>
             </ul>
@@ -119,7 +117,7 @@ export function Footer() {
 
         <div className="border-t border-slate-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-body text-xs text-muted">
-            &copy; {new Date().getFullYear()} Agro Hub. All rights reserved.
+            &copy; {new Date().getFullYear()} Nakowa. All rights reserved.
           </p>
 
           {/* Payment methods */}
@@ -136,7 +134,7 @@ export function Footer() {
           </div>
 
           <p className="font-body text-xs text-muted">
-            Powered by AIOMS
+            Powered by Lifeline Solutions
           </p>
         </div>
       </div>

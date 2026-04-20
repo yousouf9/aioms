@@ -3,6 +3,36 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type { ApiResponse } from "@/types";
 
+// DELETE — dismiss (delete) notifications
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json<ApiResponse>({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json() as { ids?: string[]; all?: boolean };
+
+    if (body.all) {
+      await db.notification.deleteMany({
+        where: { OR: [{ recipientId: session.id }, { recipientId: null }] },
+      });
+    } else if (body.ids?.length) {
+      await db.notification.deleteMany({
+        where: {
+          id: { in: body.ids },
+          OR: [{ recipientId: session.id }, { recipientId: null }],
+        },
+      });
+    }
+
+    return NextResponse.json<ApiResponse>({ success: true });
+  } catch (error) {
+    console.error("[NOTIFICATIONS_DELETE]", error);
+    return NextResponse.json<ApiResponse>({ success: false, error: "Failed to delete notifications" }, { status: 500 });
+  }
+}
+
 // GET — fetch notifications for current user (latest 30)
 export async function GET() {
   try {

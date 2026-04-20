@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Warehouse, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Warehouse, Plus, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface WarehouseItem {
@@ -26,9 +26,17 @@ export function WarehousesManager({ warehouses }: Props) {
   const router = useRouter();
   const [showAdd, setShowAdd] = useState(false);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
 
-  const totalPages = Math.max(1, Math.ceil(warehouses.length / PAGE_SIZE));
-  const paged = warehouses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const filtered = search
+    ? warehouses.filter(
+        (wh) =>
+          wh.name.toLowerCase().includes(search.toLowerCase()) ||
+          (wh.location ?? "").toLowerCase().includes(search.toLowerCase())
+      )
+    : warehouses;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div>
@@ -43,19 +51,33 @@ export function WarehousesManager({ warehouses }: Props) {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 h-11 px-4 rounded-[8px] bg-primary text-white font-display font-semibold text-sm hover:bg-primary-dark transition-colors self-start sm:self-auto"
-        >
-          <Plus className="h-4 w-4" />
-          Add Warehouse
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Search warehouses…"
+              className="h-11 pl-9 pr-3 w-48 rounded-[8px] border border-gray-200 bg-white font-body text-sm text-agro-dark placeholder:text-muted focus:outline-none focus:border-primary transition-colors"
+            />
+          </div>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-2 h-11 px-4 rounded-[8px] bg-primary text-white font-display font-semibold text-sm hover:bg-primary-dark transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Add Warehouse
+          </button>
+        </div>
       </div>
 
-      {warehouses.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="rounded-[12px] border border-dashed border-gray-200 bg-white p-12 text-center">
           <Warehouse className="h-8 w-8 text-muted mx-auto mb-3" />
-          <p className="text-muted text-sm font-body">No warehouses yet. Add the first one.</p>
+          <p className="text-muted text-sm font-body">
+            {search ? `No warehouses match "${search}".` : "No warehouses yet. Add the first one."}
+          </p>
         </div>
       ) : (
         <>

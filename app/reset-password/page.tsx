@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-agro-dark px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <Image src="/logo-light.svg" alt="Agro Hub" width={160} height={44} className="h-11 w-auto mx-auto mb-3" />
+          <Image src="/logo-light.svg" alt="Nakowa" width={160} height={44} className="h-11 w-auto mx-auto mb-3" />
           <p className="text-muted text-sm mt-1">Staff Access Portal</p>
         </div>
 
@@ -133,7 +133,7 @@ export default function ResetPasswordPage() {
         </div>
 
         <p className="text-center text-muted text-xs mt-6">
-          Agro Hub &mdash; Lafia, Nasarawa State
+          Nakowa &mdash; Lafia, Nasarawa State
         </p>
       </div>
     </div>

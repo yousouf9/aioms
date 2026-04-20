@@ -56,8 +56,10 @@ function allFalse(): PermissionMatrix {
 
 export function PermissionsEditor({
   initialData,
+  readOnly = false,
 }: {
   initialData: RoleRow[];
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   // Only show editable roles (not SUPER_ADMIN)
@@ -224,13 +226,15 @@ export function PermissionsEditor({
             )}
           </button>
         ))}
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="h-11 px-4 rounded-[8px] border border-dashed border-gray-300 text-muted hover:border-primary hover:text-primary transition-colors flex items-center gap-1.5 font-body text-sm"
-        >
-          <Plus className="h-4 w-4" />
-          New Role
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="h-11 px-4 rounded-[8px] border border-dashed border-gray-300 text-muted hover:border-primary hover:text-primary transition-colors flex items-center gap-1.5 font-body text-sm"
+          >
+            <Plus className="h-4 w-4" />
+            New Role
+          </button>
+        )}
       </div>
 
       {/* Feedback */}
@@ -279,9 +283,11 @@ export function PermissionsEditor({
                         {ACTION_LABELS[a]}
                       </th>
                     ))}
-                    <th className="text-center px-4 py-2.5 font-body text-xs font-semibold text-muted uppercase tracking-wide w-20">
-                      All
-                    </th>
+                    {!readOnly && (
+                      <th className="text-center px-4 py-2.5 font-body text-xs font-semibold text-muted uppercase tracking-wide w-20">
+                        All
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -298,8 +304,9 @@ export function PermissionsEditor({
                         {ACTIONS.map((action) => (
                           <td key={action} className="text-center px-4 py-3">
                             <button
-                              onClick={() => toggle(resource, action)}
-                              className={`h-8 w-8 mx-auto rounded-[6px] flex items-center justify-center transition-colors ${
+                              onClick={() => !readOnly && toggle(resource, action)}
+                              disabled={readOnly}
+                              className={`h-8 w-8 mx-auto rounded-[6px] flex items-center justify-center transition-colors ${readOnly ? "cursor-default" : ""} ${
                                 currentPerms?.[resource]?.[action]
                                   ? "bg-primary/10 text-primary border border-primary/20"
                                   : "bg-gray-100 text-gray-300 border border-gray-200"
@@ -313,18 +320,20 @@ export function PermissionsEditor({
                             </button>
                           </td>
                         ))}
-                        <td className="text-center px-4 py-3">
-                          <button
-                            onClick={() => toggleAllForResource(resource)}
-                            className={`h-8 px-2.5 rounded-[6px] font-body text-xs transition-colors ${
-                              allOn
-                                ? "bg-primary/10 text-primary border border-primary/20"
-                                : "bg-gray-100 text-muted border border-gray-200 hover:bg-gray-200"
-                            }`}
-                          >
-                            {allOn ? "All" : "None"}
-                          </button>
-                        </td>
+                        {!readOnly && (
+                          <td className="text-center px-4 py-3">
+                            <button
+                              onClick={() => toggleAllForResource(resource)}
+                              className={`h-8 px-2.5 rounded-[6px] font-body text-xs transition-colors ${
+                                allOn
+                                  ? "bg-primary/10 text-primary border border-primary/20"
+                                  : "bg-gray-100 text-muted border border-gray-200 hover:bg-gray-200"
+                              }`}
+                            >
+                              {allOn ? "All" : "None"}
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
@@ -368,7 +377,7 @@ export function PermissionsEditor({
       )}
 
       {/* Action bar */}
-      <div className="flex flex-wrap items-center gap-3 mt-6">
+      {!readOnly && <div className="flex flex-wrap items-center gap-3 mt-6">
         <button
           onClick={saveRole}
           disabled={saving || !hasChanges}
@@ -395,7 +404,7 @@ export function PermissionsEditor({
             {deleting ? "Deleting…" : "Delete Role"}
           </button>
         )}
-      </div>
+      </div>}
 
       {showCreateModal && (
         <CreateRoleModal onClose={() => setShowCreateModal(false)} onCreated={handleRoleCreated} />

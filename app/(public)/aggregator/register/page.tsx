@@ -3,12 +3,36 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, UserPlus, Upload, Camera, X } from "lucide-react";
+import { Loader2, UserPlus, Upload, Camera, X, ChevronRight, Users, Wheat, ShoppingBag } from "lucide-react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
-export default function AggregatorRegisterPage() {
+const CUSTOMER_TYPES = [
+  {
+    value: "AGGREGATOR",
+    label: "Aggregator",
+    description: "Supply grains, beans, rice, maize and other agricultural commodities",
+    icon: Wheat,
+  },
+  {
+    value: "AGRO_INPUT",
+    label: "Agro Input Customer",
+    description: "Purchase seeds, fertilizers, pesticides and other farm inputs",
+    icon: ShoppingBag,
+  },
+  {
+    value: "BUYER",
+    label: "Buyer",
+    description: "Buy agricultural produce and commodities for personal or commercial use",
+    icon: Users,
+  },
+];
+
+export default function CustomerRegisterPage() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [step, setStep] = useState<"type" | "details">("type");
+  const [customerType, setCustomerType] = useState("");
   const [form, setForm] = useState({
     name: "", phone: "", email: "", password: "", confirmPassword: "", address: "",
   });
@@ -82,6 +106,7 @@ export default function AggregatorRegisterPage() {
           password: form.password,
           address: form.address.trim() || undefined,
           profileImageUrl: profileImageUrl || undefined,
+          customerType,
         }),
       });
       const data = await res.json();
@@ -97,6 +122,61 @@ export default function AggregatorRegisterPage() {
     }
   };
 
+  // Step 1: select customer type
+  if (step === "type") {
+    return (
+      <div className="min-h-[80svh] flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center h-14 w-14 rounded-full bg-primary/10 mb-4">
+              <UserPlus className="h-7 w-7 text-primary" />
+            </div>
+            <h1 className="font-display text-2xl font-bold text-agro-dark">Become a Customer</h1>
+            <p className="text-muted text-sm mt-1">Select the type of account that best describes you</p>
+          </div>
+
+          <div className="space-y-3">
+            {CUSTOMER_TYPES.map((type) => {
+              const Icon = type.icon;
+              return (
+                <button
+                  key={type.value}
+                  type="button"
+                  onClick={() => { setCustomerType(type.value); setStep("details"); }}
+                  className={cn(
+                    "w-full flex items-center gap-4 p-4 rounded-[12px] border-2 text-left transition-all",
+                    customerType === type.value
+                      ? "border-primary bg-primary/5"
+                      : "border-gray-200 bg-white hover:border-primary/40 hover:bg-gray-50"
+                  )}
+                >
+                  <div className="h-12 w-12 rounded-[8px] bg-primary/10 flex items-center justify-center shrink-0">
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display font-semibold text-agro-dark">{type.label}</p>
+                    <p className="font-body text-xs text-muted mt-0.5 leading-relaxed">{type.description}</p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted shrink-0" />
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="text-center text-sm text-muted mt-6">
+            Already have an account?{" "}
+            <Link href="/aggregator/login" className="text-primary font-medium hover:underline">
+              Login
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const selectedType = CUSTOMER_TYPES.find((t) => t.value === customerType);
+
+  // Step 2: fill in details
   return (
     <div className="min-h-[80svh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
@@ -104,8 +184,20 @@ export default function AggregatorRegisterPage() {
           <div className="inline-flex items-center justify-center h-14 w-14 rounded-full bg-primary/10 mb-4">
             <UserPlus className="h-7 w-7 text-primary" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-agro-dark">Become an Aggregator</h1>
-          <p className="text-muted-dark text-sm mt-1">Create an account to supply agricultural products to Agro Hub</p>
+          <h1 className="font-display text-2xl font-bold text-agro-dark">Create Account</h1>
+          {selectedType && (
+            <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+              {selectedType.label}
+              <button
+                type="button"
+                onClick={() => setStep("type")}
+                className="ml-1 text-primary/60 hover:text-primary transition-colors"
+                title="Change type"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-[12px] border border-gray-200 shadow-card p-6 space-y-4">

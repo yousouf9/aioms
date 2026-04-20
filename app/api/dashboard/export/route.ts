@@ -52,7 +52,7 @@ async function exportOrders() {
     createdAt: o.createdAt.toISOString(),
   }));
 
-  return csvResponse(toCSV(rows), `agrohub-orders-${today()}.csv`);
+  return csvResponse(toCSV(rows), `nakowa-orders-${today()}.csv`);
 }
 
 async function exportPayments() {
@@ -76,7 +76,7 @@ async function exportPayments() {
     createdAt: p.createdAt.toISOString(),
   }));
 
-  return csvResponse(toCSV(rows), `agrohub-payments-${today()}.csv`);
+  return csvResponse(toCSV(rows), `nakowa-payments-${today()}.csv`);
 }
 
 async function exportInventory() {
@@ -108,7 +108,7 @@ async function exportInventory() {
     };
   });
 
-  return csvResponse(toCSV(rows), `agrohub-inventory-${today()}.csv`);
+  return csvResponse(toCSV(rows), `nakowa-inventory-${today()}.csv`);
 }
 
 async function exportCredit() {
@@ -132,7 +132,7 @@ async function exportCredit() {
     createdAt: c.createdAt.toISOString(),
   }));
 
-  return csvResponse(toCSV(rows), `agrohub-credit-${today()}.csv`);
+  return csvResponse(toCSV(rows), `nakowa-credit-${today()}.csv`);
 }
 
 async function exportCustomers() {
@@ -155,7 +155,7 @@ async function exportCustomers() {
     createdAt: c.createdAt.toISOString(),
   }));
 
-  return csvResponse(toCSV(rows), `agrohub-customers-${today()}.csv`);
+  return csvResponse(toCSV(rows), `nakowa-customers-${today()}.csv`);
 }
 
 function today() {

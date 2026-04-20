@@ -35,12 +35,13 @@ async function getDashboardData() {
       },
       _sum: { amount: true },
     }),
-    db.shopStock.count({
-      where: {
-        quantity: { lte: 5 },
-        product: { isActive: true },
-      },
-    }),
+    db.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(DISTINCT p.id) as count FROM products p
+      WHERE p."isActive" = true AND (
+        EXISTS (SELECT 1 FROM warehouse_stocks ws WHERE ws."productId" = p.id AND ws.quantity <= p."lowStockThreshold")
+        OR EXISTS (SELECT 1 FROM shop_stocks ss WHERE ss."productId" = p.id AND ss.quantity <= p."lowStockThreshold")
+      )
+    `,
     db.creditSale.count({
       where: {
         status: { in: ["ACTIVE", "OVERDUE"] },
@@ -84,7 +85,7 @@ async function getDashboardData() {
   return {
     ordersToday,
     todayRevenue: revenueResult._sum.amount?.toNumber() ?? 0,
-    lowStockProducts,
+    lowStockProducts: Number((lowStockProducts as { count: bigint }[])[0]?.count ?? 0),
     overdueCredits,
     pendingTransfers,
     recentOrders,
@@ -106,6 +107,7 @@ export default async function DashboardPage() {
   if (!session) redirect("/login");
 
   const data = await getDashboardData();
+  const canViewFinancials = session.role === "SUPER_ADMIN" || session.role === "MANAGER";
 
   const stats = [
     {
@@ -113,26 +115,30 @@ export default async function DashboardPage() {
       value: data.ordersToday,
       icon: ClipboardList,
       color: "text-blue-500 bg-blue-50",
+      visible: true,
     },
     {
       label: "Today's Revenue",
-      value: formatCurrency(data.todayRevenue),
+      value: canViewFinancials ? formatCurrency(data.todayRevenue) : "—",
       icon: TrendingUp,
       color: "text-green-500 bg-green-50",
+      visible: true,
     },
     {
       label: "Low Stock Items",
       value: data.lowStockProducts,
       icon: AlertTriangle,
       color: data.lowStockProducts > 0 ? "text-red-500 bg-red-50" : "text-gray-400 bg-gray-50",
+      visible: true,
     },
     {
       label: "Overdue Credits",
-      value: data.overdueCredits,
+      value: canViewFinancials ? data.overdueCredits : "—",
       icon: CreditCard,
       color: data.overdueCredits > 0 ? "text-amber-500 bg-amber-50" : "text-gray-400 bg-gray-50",
+      visible: canViewFinancials,
     },
-  ];
+  ].filter((s) => s.visible);
 
   return (
     <div>
@@ -174,7 +180,7 @@ export default async function DashboardPage() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className={`grid grid-cols-1 ${canViewFinancials ? "lg:grid-cols-2" : ""} gap-6`}>
         {/* Recent Orders */}
         <div className="bg-white rounded-[12px] border border-gray-200 shadow-card p-5">
           <h2 className="font-display font-semibold text-agro-dark text-sm mb-4">Today&apos;s Orders</h2>
@@ -202,8 +208,8 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Recent Payments */}
-        <div className="bg-white rounded-[12px] border border-gray-200 shadow-card p-5">
+        {/* Recent Payments — managers/admins only */}
+        {canViewFinancials && <div className="bg-white rounded-[12px] border border-gray-200 shadow-card p-5">
           <h2 className="font-display font-semibold text-agro-dark text-sm mb-4">Recent Payments</h2>
           {data.recentPayments.length === 0 ? (
             <p className="text-muted text-sm py-4 text-center">No payments yet.</p>
@@ -222,7 +228,7 @@ export default async function DashboardPage() {
               ))}
             </div>
           )}
-        </div>
+        </div>}
       </div>
     </div>
   );

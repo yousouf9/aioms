@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Agro Hub — Agricultural Supplies & Inventory Management",
+  title: "Nakowa — Agricultural Supplies & Inventory Management",
   description:
     "Your trusted source for herbicides, fertilizers, machinery, seeds, and agricultural inputs. Order online or visit our stores.",
   keywords: ["agro", "agriculture", "herbicides", "fertilizers", "machinery", "seeds", "grains", "farming", "Nigeria"],
@@ -42,7 +42,7 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${spaceGrotesk.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+      <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>{children}</body>
     </html>
   );
 }

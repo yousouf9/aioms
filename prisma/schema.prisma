@@ -34,6 +34,9 @@ model User {
   creditPaymentsRecorded CreditPayment[]
   ordersProcessed   Order[]
   deliveriesReceived AggregatorDelivery[]
+  suppliersCreated   Supplier[]           @relation("SupplierCreatedBy")
+  supplierDeliveries SupplierDelivery[]   @relation("DeliveryRecordedBy")
+  supplierPayments   SupplierPayment[]    @relation("PaymentRecordedBy")
 
   @@map("users")
 }
@@ -104,7 +107,8 @@ model Warehouse {
   stocks          WarehouseStock[]
   transfersOut    StockTransfer[]  @relation("TransferFromWarehouse")
   transfersIn     StockTransfer[]  @relation("TransferToWarehouse")
-  fulfilledOrders Order[]          @relation("OrderFulfillment")
+  fulfilledOrders    Order[]          @relation("OrderFulfillment")
+  supplierDeliveries SupplierDelivery[]
 
   @@map("warehouses")
 }
@@ -166,6 +170,7 @@ model Product {
   orderItems        OrderItem[]
   creditSaleItems   CreditSaleItem[]
   priceHistory      PriceHistory[]
+  supplierDeliveries SupplierDelivery[]
 
   @@map("products")
 }
@@ -586,6 +591,68 @@ model Notification {
 
   @@index([recipientId, isRead])
   @@map("notifications")
+}
+
+// ─── SUPPLIER MODULE ──────────────────────────────────────────────────────────
+
+model Supplier {
+  id            String             @id @default(cuid())
+  name          String
+  phone         String
+  email         String?
+  address       String?
+  notes         String?
+  isActive      Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  createdById   String?
+  createdBy     User?              @relation("SupplierCreatedBy", fields: [createdById], references: [id])
+  deliveries    SupplierDelivery[]
+  payments      SupplierPayment[]
+
+  @@map("suppliers")
+}
+
+model SupplierDelivery {
+  id            String              @id @default(cuid())
+  supplierId    String
+  productId     String
+  warehouseId   String
+  quantity      Int
+  unitCost      Decimal             @db.Decimal(12, 2)
+  totalCost     Decimal             @db.Decimal(12, 2)
+  notes         String?
+  deliveredAt   DateTime            @default(now())
+  createdAt     DateTime            @default(now())
+  recordedById  String?
+  supplier      Supplier            @relation(fields: [supplierId], references: [id])
+  product       Product             @relation(fields: [productId], references: [id])
+  warehouse     Warehouse           @relation(fields: [warehouseId], references: [id])
+  recordedBy    User?               @relation("DeliveryRecordedBy", fields: [recordedById], references: [id])
+  payments      SupplierPayment[]   @relation("DeliveryPayments")
+
+  @@index([supplierId])
+  @@index([productId])
+  @@map("supplier_deliveries")
+}
+
+model SupplierPayment {
+  id           String           @id @default(cuid())
+  supplierId   String
+  deliveryId   String?
+  amount       Decimal          @db.Decimal(12, 2)
+  method       PaymentMethod    @default(CASH)
+  reference    String?
+  notes        String?
+  paidAt       DateTime         @default(now())
+  createdAt    DateTime         @default(now())
+  recordedById String?
+  supplier     Supplier         @relation(fields: [supplierId], references: [id])
+  delivery     SupplierDelivery? @relation("DeliveryPayments", fields: [deliveryId], references: [id])
+  recordedBy   User?            @relation("PaymentRecordedBy", fields: [recordedById], references: [id])
+
+  @@index([supplierId])
+  @@map("supplier_payments")
 }
 
 // ─── ENUMS ────────────────────────────────────────────────────────────────

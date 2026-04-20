@@ -6,7 +6,7 @@ export default function NotFound() {
     <div className="min-h-screen bg-agro-dark flex items-center justify-center px-4">
       <div className="text-center max-w-sm">
         <div className="mb-8">
-          <Image src="/logo-light.svg" alt="Agro Hub" width={160} height={44} className="h-11 w-auto mx-auto" />
+          <Image src="/logo-light.svg" alt="Nakowa" width={160} height={44} className="h-11 w-auto mx-auto" />
         </div>
 
         <p className="font-display font-bold text-[96px] leading-none text-primary/20 select-none mb-2">

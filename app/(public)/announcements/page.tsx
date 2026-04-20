@@ -20,7 +20,7 @@ export default async function AnnouncementsPage() {
         <h1 className="font-display font-bold text-2xl sm:text-3xl text-frost-white mb-2">
           News & Announcements
         </h1>
-        <p className="text-muted text-sm">Latest updates and important information from Agro Hub</p>
+        <p className="text-muted text-sm">Latest updates and important information from Nakowa</p>
       </div>
 
       {announcements.length === 0 ? (

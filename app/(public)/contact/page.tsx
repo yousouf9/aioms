@@ -108,7 +108,7 @@ export default async function ContactPage() {
             <h3 className="font-display font-semibold text-agro-dark text-lg">Our Location</h3>
           </div>
           <p className="text-sm text-agro-dark leading-relaxed mb-4">
-            {settings?.address || "Lafia, Nasarawa State, Nigeria"}
+            {settings?.address || "No. 42 behind Romantic Bakery, Anguwan Jaba, Lafia, Nasarawa State, Nigeria"}
           </p>
           {settings?.googleMapsUrl && (
             <a
@@ -129,9 +129,7 @@ export default async function ContactPage() {
           </div>
           <div className="space-y-0">
             {[
-              { day: "Monday - Friday", time: "8:00 AM - 6:00 PM" },
-              { day: "Saturday", time: "8:00 AM - 4:00 PM" },
-              { day: "Sunday", time: "Closed" },
+              { day: "Every Day", time: "7:00 AM - 6:00 PM" },
             ].map(({ day, time }) => (
               <div key={day} className="flex items-center justify-between gap-3 py-3 border-b border-gray-100 last:border-0">
                 <span className="text-sm text-muted-dark">{day}</span>

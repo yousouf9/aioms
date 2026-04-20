@@ -52,7 +52,7 @@ export default function AggregatorLandingPage() {
           </div>
           <h1 className="font-display text-3xl md:text-5xl font-bold text-white mb-4">
             Supply Agricultural Products to{" "}
-            <span className="text-primary">Agro Hub</span>
+            <span className="text-primary">Nakowa</span>
           </h1>
           <p className="text-muted text-base md:text-lg max-w-2xl mx-auto mb-8">
             Join our aggregator network. Supply grains, beans, rice, maize, and other agricultural commodities
@@ -63,7 +63,7 @@ export default function AggregatorLandingPage() {
               href="/aggregator/register"
               className="flex items-center gap-2 h-14 px-8 rounded-[8px] bg-primary text-white font-display font-semibold hover:bg-primary-dark transition-colors"
             >
-              <UserPlus className="h-5 w-5" /> Become an Aggregator
+              <UserPlus className="h-5 w-5" /> Register as Aggregator
             </Link>
             <Link
               href="/aggregator/login"

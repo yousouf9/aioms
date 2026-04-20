@@ -3,7 +3,8 @@ import { redirect, notFound } from "next/navigation";
 import { ArrowLeft, Store, Warehouse as WarehouseIcon, AlertTriangle } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { formatCurrency, formatDate, cn } from "@/lib/utils";
+import { formatDate, cn } from "@/lib/utils";
+import { ShopStockList } from "@/components/dashboard/shop-stock-list";
 
 export default async function ShopDetailPage({
   params,
@@ -112,7 +113,7 @@ export default async function ShopDetailPage({
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label="Total Units" value={totalUnits.toLocaleString()} />
-        <StatCard label="Distinct SKUs" value={distinctSkus.toString()} />
+        <StatCard label="Distinct Stock" value={distinctSkus.toString()} />
         <StatCard
           label="Low Stock"
           value={lowStockCount.toString()}
@@ -126,108 +127,20 @@ export default async function ShopDetailPage({
         <h2 className="font-display text-lg font-bold text-agro-dark mb-3">
           Stock in this shop
         </h2>
-
-        {shop.stocks.length === 0 ? (
-          <EmptyState text="No stock yet. Add stock from the Inventory page." />
-        ) : (
-          <>
-            {/* Desktop table */}
-            <div className="hidden md:block rounded-[12px] border border-gray-200 bg-white overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr className="text-left">
-                    <th className="px-4 py-3 font-body font-medium text-muted text-xs uppercase tracking-wide">
-                      Product
-                    </th>
-                    <th className="px-4 py-3 font-body font-medium text-muted text-xs uppercase tracking-wide">
-                      Category
-                    </th>
-                    <th className="px-4 py-3 font-body font-medium text-muted text-xs uppercase tracking-wide">
-                      Quantity
-                    </th>
-                    <th className="px-4 py-3 font-body font-medium text-muted text-xs uppercase tracking-wide">
-                      Selling Price
-                    </th>
-                    <th className="px-4 py-3 font-body font-medium text-muted text-xs uppercase tracking-wide">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {shop.stocks.map((stock) => {
-                    const low = stock.quantity <= stock.product.lowStockThreshold;
-                    return (
-                      <tr
-                        key={stock.id}
-                        className={cn(low && "bg-amber-50/30")}
-                      >
-                        <td className="px-4 py-3 font-body text-agro-dark font-medium">
-                          {stock.product.name}
-                        </td>
-                        <td className="px-4 py-3 font-body text-muted">
-                          {stock.product.category.name}
-                        </td>
-                        <td className="px-4 py-3 font-body text-agro-dark">
-                          {stock.quantity.toLocaleString()}{" "}
-                          <span className="text-muted text-xs">
-                            {stock.product.unit.toLowerCase()}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 font-body text-agro-dark">
-                          {formatCurrency(stock.product.sellingPrice.toNumber())}
-                        </td>
-                        <td className="px-4 py-3">
-                          <StatusBadge low={low} />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile cards */}
-            <div className="md:hidden space-y-3">
-              {shop.stocks.map((stock) => {
-                const low = stock.quantity <= stock.product.lowStockThreshold;
-                return (
-                  <div
-                    key={stock.id}
-                    className={cn(
-                      "rounded-[12px] border border-gray-200 bg-white p-4",
-                      low && "bg-amber-50/30"
-                    )}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h3 className="font-body font-medium text-agro-dark">
-                          {stock.product.name}
-                        </h3>
-                        <p className="text-xs text-muted mt-0.5">
-                          {stock.product.category.name}
-                        </p>
-                      </div>
-                      <StatusBadge low={low} />
-                    </div>
-                    <div className="mt-3 flex items-end justify-between">
-                      <div>
-                        <p className="font-display text-2xl font-bold text-agro-dark leading-none">
-                          {stock.quantity.toLocaleString()}
-                        </p>
-                        <p className="text-xs text-muted mt-1">
-                          {stock.product.unit.toLowerCase()}
-                        </p>
-                      </div>
-                      <p className="text-sm text-agro-dark font-body">
-                        {formatCurrency(stock.product.sellingPrice.toNumber())}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
+        <ShopStockList
+          stocks={shop.stocks.map((s) => ({
+            id: s.id,
+            quantity: s.quantity,
+            product: {
+              id: s.product.id,
+              name: s.product.name,
+              unit: s.product.unit,
+              sellingPrice: s.product.sellingPrice.toNumber(),
+              lowStockThreshold: s.product.lowStockThreshold,
+              category: { name: s.product.category.name },
+            },
+          }))}
+        />
       </section>
     </div>
   );
@@ -262,23 +175,3 @@ function StatCard({
   );
 }
 
-function StatusBadge({ low }: { low: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-block px-2 py-0.5 rounded-[6px] text-xs font-medium",
-        low ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
-      )}
-    >
-      {low ? "Low" : "OK"}
-    </span>
-  );
-}
-
-function EmptyState({ text }: { text: string }) {
-  return (
-    <div className="rounded-[12px] border border-dashed border-gray-200 bg-white p-8 text-center">
-      <p className="text-muted text-sm font-body">{text}</p>
-    </div>
-  );
-}

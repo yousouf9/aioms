@@ -64,7 +64,7 @@ export function Navbar() {
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-          <Image src="/logo-light.svg" alt="Agro Hub" width={140} height={32} className="h-8 w-auto" priority />
+          <Image src="/logo-light.svg" alt="Nakowa" width={140} height={32} className="h-8 w-auto" priority />
         </Link>
 
         {/* Desktop nav */}
@@ -112,10 +112,10 @@ export function Navbar() {
           </Link>
         ) : (
           <Link
-            href="/aggregator"
+            href="/aggregator/register"
             className="hidden md:flex items-center h-10 px-5 rounded-[8px] bg-primary text-white font-display font-semibold text-sm hover:bg-primary-dark transition-colors glow-primary"
           >
-            Become an Aggregator
+            Become a Customer
           </Link>
         )}
 
@@ -198,11 +198,11 @@ export function Navbar() {
             </Link>
           ) : (
             <Link
-              href="/aggregator"
+              href="/aggregator/register"
               onClick={() => setOpen(false)}
-              className="flex items-center justify-center h-12 mt-2 rounded-[8px] bg-primary text-white font-display font-semibold text-base"
+              className="flex items-center justify-center h-12 px-4 mt-2 rounded-[8px] bg-primary text-white font-display font-semibold text-base hover:bg-primary-dark transition-colors"
             >
-              Become an Aggregator
+              Become a Customer
             </Link>
           )}
         </nav>

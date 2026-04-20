@@ -60,7 +60,7 @@ function LoginForm() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Image src="/logo-light.svg" alt="Agro Hub" width={160} height={44} className="h-11 w-auto mx-auto" />
+          <Image src="/logo-light.svg" alt="Nakowa" width={160} height={44} className="h-11 w-auto mx-auto" />
           <p className="text-muted text-sm mt-3">Staff Access Portal</p>
         </div>
 
@@ -82,7 +82,7 @@ function LoginForm() {
                 required
                 autoComplete="email"
                 className="w-full h-11 px-3 rounded-[8px] bg-agro-dark border border-slate-border text-frost-white text-sm placeholder:text-muted focus:outline-none focus:border-primary transition-colors"
-                placeholder="staff@agrohub.com"
+                placeholder="staff@nakowa.com.ng"
               />
             </div>
 
@@ -118,7 +118,7 @@ function LoginForm() {
         </div>
 
         <p className="text-center text-muted text-xs mt-6">
-          Agro Hub &mdash; Agricultural Supplies & Inventory Management
+          Nakowa &mdash; Agricultural Supplies & Inventory Management
         </p>
       </div>
     </div>

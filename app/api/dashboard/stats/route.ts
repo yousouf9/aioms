@@ -21,26 +21,22 @@ export async function GET() {
     const [
       todayOrders,
       revenueResult,
-      lowStockItems,
+      todaySalesResult,
       overdueCredits,
       pendingTransfers,
       stockValue,
+      lowStockRaw,
     ] = await Promise.all([
       db.order.count({
-        where: { createdAt: { gte: today, lt: tomorrow } },
+        where: { createdAt: { gte: today, lt: tomorrow }, status: { not: "CANCELLED" } },
       }),
       db.payment.aggregate({
-        where: {
-          status: "PAID",
-          confirmedAt: { gte: today, lt: tomorrow },
-        },
+        where: { status: "PAID", confirmedAt: { gte: today, lt: tomorrow } },
         _sum: { amount: true },
       }),
-      db.shopStock.count({
-        where: {
-          quantity: { lte: 5 },
-          product: { isActive: true },
-        },
+      db.sale.aggregate({
+        where: { createdAt: { gte: today, lt: tomorrow } },
+        _sum: { total: true },
       }),
       db.creditSale.count({
         where: {
@@ -48,15 +44,31 @@ export async function GET() {
           dueDate: { lt: today },
         },
       }),
-      db.stockTransfer.count({
-        where: { status: "PENDING" },
-      }),
+      db.stockTransfer.count({ where: { status: "PENDING" } }),
       db.warehouseStock.findMany({
         where: { quantity: { gt: 0 } },
         include: { product: { select: { costPrice: true } } },
       }),
+      db.$queryRaw<{ count: bigint }[]>`
+        SELECT COUNT(DISTINCT p.id) as count
+        FROM products p
+        WHERE p.is_active = true
+        AND (
+          EXISTS (
+            SELECT 1 FROM warehouse_stocks ws
+            WHERE ws.product_id = p.id AND ws.quantity <= p.low_stock_threshold
+          )
+          OR EXISTS (
+            SELECT 1 FROM shop_stocks ss
+            WHERE ss.product_id = p.id AND ss.quantity <= p.low_stock_threshold
+          )
+        )
+      `,
     ]);
 
+    const lowStockItems = Number(lowStockRaw[0]?.count ?? 0);
+    const paymentRevenue = revenueResult._sum.amount?.toNumber() ?? 0;
+    const salesRevenue = todaySalesResult._sum.total?.toNumber() ?? 0;
     const totalStockValue = stockValue.reduce(
       (sum, s) => sum + s.quantity * s.product.costPrice.toNumber(),
       0
@@ -64,7 +76,7 @@ export async function GET() {
 
     const stats: DashboardStats = {
       todayOrders,
-      todayRevenue: revenueResult._sum.amount?.toNumber() ?? 0,
+      todayRevenue: paymentRevenue + salesRevenue,
       lowStockCount: lowStockItems,
       overdueCredits,
       pendingTransfers,

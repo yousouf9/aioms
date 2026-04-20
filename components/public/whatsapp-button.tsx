@@ -7,7 +7,7 @@ interface WhatsAppButtonProps {
 
 export function WhatsAppButton({
   phone,
-  message = "Hi! I'd like to make an enquiry about Agro Hub Lafia.",
+  message = "Hi! I'd like to make an enquiry about Nakowa Lafia.",
 }: WhatsAppButtonProps) {
   const url = `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
 
