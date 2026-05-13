@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Mail, Phone, MapPin, StickyNote, Calendar } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, StickyNote, Calendar, Plus } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { getPermissionsForRole } from "@/lib/permissions";
 
 function roleBadgeClass(role: string) {
   if (role === "BUYER") return "bg-blue-100 text-blue-700";
@@ -44,20 +45,39 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   const { id } = await params;
   const session = await getSession();
   if (!session) redirect("/login");
+  const permissions = await getPermissionsForRole(session.role);
+  const canViewFinancials = session.role === "SUPER_ADMIN" || session.role === "MANAGER";
+  const canCreateOrder = permissions.orders.create;
+  const canCreateCredit = permissions.credit.create;
 
-  const customer = await db.customer.findUnique({
-    where: { id },
-    include: {
-      orders: { orderBy: { createdAt: "desc" }, take: 20 },
-      creditSales: { orderBy: { createdAt: "desc" }, take: 20 },
-      aggregatorOffers: { orderBy: { createdAt: "desc" }, take: 20 },
-      _count: {
-        select: { orders: true, creditSales: true, aggregatorOffers: true, sales: true },
+  const [customer, orderTotals, creditTotals] = await Promise.all([
+    db.customer.findUnique({
+      where: { id },
+      include: {
+        orders: { orderBy: { createdAt: "desc" }, take: 20 },
+        creditSales: { orderBy: { createdAt: "desc" }, take: 20 },
+        aggregatorOffers: { orderBy: { createdAt: "desc" }, take: 20 },
+        _count: {
+          select: { orders: true, creditSales: true, aggregatorOffers: true, sales: true },
+        },
       },
-    },
-  });
+    }),
+    db.order.aggregate({
+      where: { customerId: id, status: { not: "CANCELLED" } },
+      _sum: { total: true },
+    }),
+    db.creditSale.aggregate({
+      where: { customerId: id },
+      _sum: { totalAmount: true, paidAmount: true },
+    }),
+  ]);
 
   if (!customer) notFound();
+
+  const totalOrderValue = orderTotals._sum.total?.toNumber() ?? 0;
+  const totalCreditIssued = creditTotals._sum.totalAmount?.toNumber() ?? 0;
+  const totalCreditPaid = creditTotals._sum.paidAmount?.toNumber() ?? 0;
+  const totalCreditOutstanding = Math.max(0, totalCreditIssued - totalCreditPaid);
 
   return (
     <div>
@@ -85,20 +105,50 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="bg-frost-white rounded-[8px] px-3 py-2 min-w-[72px]">
-              <p className="font-display font-bold text-lg text-agro-dark">{customer._count.orders}</p>
-              <p className="font-body text-[10px] uppercase text-muted tracking-wide">Orders</p>
-            </div>
-            <div className="bg-frost-white rounded-[8px] px-3 py-2 min-w-[72px]">
-              <p className="font-display font-bold text-lg text-agro-dark">{customer._count.creditSales}</p>
-              <p className="font-body text-[10px] uppercase text-muted tracking-wide">Credits</p>
-            </div>
-            <div className="bg-frost-white rounded-[8px] px-3 py-2 min-w-[72px]">
-              <p className="font-display font-bold text-lg text-agro-dark">{customer._count.aggregatorOffers}</p>
-              <p className="font-body text-[10px] uppercase text-muted tracking-wide">Offers</p>
-            </div>
+          <div className="flex flex-wrap gap-2">
+            {canCreateOrder && (
+              <Link
+                href={`/dashboard/orders?newOrder=1&customerId=${customer.id}&name=${encodeURIComponent(customer.name)}&phone=${encodeURIComponent(customer.phone)}`}
+                className="h-9 px-3 rounded-[8px] bg-primary text-white font-body text-xs font-medium flex items-center gap-1.5 hover:bg-primary/90 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                New Order
+              </Link>
+            )}
+            {canCreateCredit && (
+              <Link
+                href={`/dashboard/credit?newCredit=1&customerId=${customer.id}&name=${encodeURIComponent(customer.name)}&phone=${encodeURIComponent(customer.phone)}`}
+                className="h-9 px-3 rounded-[8px] border border-primary text-primary font-body text-xs font-medium flex items-center gap-1.5 hover:bg-primary/5 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                New Credit
+              </Link>
+            )}
           </div>
+        </div>
+
+        {/* Cumulative stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+          <div className="bg-frost-white rounded-[8px] px-3 py-2 text-center">
+            <p className="font-display font-bold text-lg text-agro-dark">{customer._count.orders}</p>
+            <p className="font-body text-[10px] uppercase text-muted tracking-wide">Orders</p>
+          </div>
+          <div className="bg-frost-white rounded-[8px] px-3 py-2 text-center">
+            <p className="font-display font-bold text-lg text-agro-dark">{customer._count.creditSales}</p>
+            <p className="font-body text-[10px] uppercase text-muted tracking-wide">Credits</p>
+          </div>
+          {canViewFinancials && (
+            <div className="bg-green-50 rounded-[8px] px-3 py-2 text-center">
+              <p className="font-display font-bold text-base text-green-700">{formatCurrency(totalOrderValue)}</p>
+              <p className="font-body text-[10px] uppercase text-muted tracking-wide">Orders Value</p>
+            </div>
+          )}
+          {canViewFinancials && (
+            <div className={`rounded-[8px] px-3 py-2 text-center ${totalCreditOutstanding > 0 ? "bg-red-50" : "bg-gray-50"}`}>
+              <p className={`font-display font-bold text-base ${totalCreditOutstanding > 0 ? "text-red-700" : "text-agro-dark"}`}>{formatCurrency(totalCreditOutstanding)}</p>
+              <p className="font-body text-[10px] uppercase text-muted tracking-wide">Credit Owed</p>
+            </div>
+          )}
         </div>
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -228,7 +278,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                         Paid {formatCurrency(paid)} / {formatCurrency(total)}
                       </p>
                       <p className="font-display font-semibold text-sm text-agro-dark">
-                        {formatCurrency(total - paid)} due
+                        {formatCurrency(cs.status === "RETURNED" ? 0 : total - paid)} due
                       </p>
                     </div>
                     {cs.dueDate && (
@@ -259,7 +309,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                         <td className="px-3 py-2.5 font-body text-xs text-agro-dark">{cs.creditType}</td>
                         <td className="px-3 py-2.5 font-body text-sm text-agro-dark">{formatCurrency(total)}</td>
                         <td className="px-3 py-2.5 font-body text-sm text-agro-dark">{formatCurrency(paid)}</td>
-                        <td className="px-3 py-2.5 font-display font-semibold text-sm text-agro-dark">{formatCurrency(total - paid)}</td>
+                        <td className="px-3 py-2.5 font-display font-semibold text-sm text-agro-dark">{formatCurrency(cs.status === "RETURNED" ? 0 : total - paid)}</td>
                         <td className="px-3 py-2.5 font-body text-xs text-muted">{cs.dueDate ? formatDate(cs.dueDate) : cs.season ?? "—"}</td>
                         <td className="px-3 py-2.5">
                           <span className={`px-2 py-0.5 rounded-[6px] text-[10px] font-medium ${creditStatusClass(cs.status)}`}>

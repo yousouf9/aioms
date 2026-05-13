@@ -55,7 +55,7 @@ export default async function ContactPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
         {whatsapp && (
           <a
-            href={`https://wa.me/${whatsapp}?text=Hello%20Agro%20Hub%2C%20I%20have%20a%20question.`}
+            href={`https://wa.me/${whatsapp}?text=Hello%20Nakowa%2C%20I%20have%20a%20question.`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-primary rounded-[12px] p-6 hover:bg-primary-dark transition-all active:scale-[0.98]"

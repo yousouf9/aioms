@@ -51,7 +51,7 @@ export function Footer() {
                 { Icon: FacebookIcon, label: "Facebook", href: "#" },
                 { Icon: InstagramIcon, label: "Instagram", href: "#" },
                 { Icon: XIcon, label: "X (Twitter)", href: "#" },
-                { Icon: WhatsAppIcon, label: "WhatsApp", href: "#" },
+                { Icon: WhatsAppIcon, label: "WhatsApp", href: "https://wa.me/2348030616849" },
               ].map(({ Icon, label, href }) => (
                 <a
                   key={label}
@@ -100,6 +100,10 @@ export function Footer() {
               <li className="flex items-center gap-2.5">
                 <Phone className="h-4 w-4 text-primary shrink-0" />
                 <span className="font-body text-sm text-muted">+2348088666857</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <WhatsAppIcon className="h-4 w-4 text-primary shrink-0" />
+                <a href="https://wa.me/2348030616849" target="_blank" rel="noopener noreferrer" className="font-body text-sm text-muted hover:text-frost-white transition-colors">+2348030616849 (WhatsApp)</a>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 text-primary shrink-0" />

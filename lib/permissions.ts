@@ -9,7 +9,7 @@ export type Action = PermissionAction;
 
 export const RESOURCES: PermissionResource[] = [
   "orders", "sales", "payments", "inventory", "warehouses",
-  "credit", "aggregators", "customers", "staff",
+  "credit", "aggregators", "customers", "staff", "suppliers",
   "announcements", "reports", "settings", "attendance",
 ];
 
@@ -25,6 +25,7 @@ export const RESOURCE_LABELS: Record<PermissionResource, string> = {
   aggregators: "Aggregators",
   customers: "Customers",
   staff: "Staff",
+  suppliers: "Suppliers",
   announcements: "Announcements",
   reports: "Reports",
   settings: "Settings",
@@ -43,6 +44,7 @@ const SYSTEM_ROLE_DEFAULTS: Record<string, Partial<PermissionMatrix>> = {
     aggregators: { view: true, create: true, update: true, delete: false },
     customers: { view: true, create: true, update: true, delete: false },
     staff: { view: true, create: false, update: false, delete: false },
+    suppliers: { view: true, create: true, update: true, delete: false },
     announcements: { view: true, create: true, update: true, delete: true },
     reports: { view: true, create: false, update: false, delete: false },
     settings: { view: true, create: false, update: true, delete: false },
@@ -58,6 +60,7 @@ const SYSTEM_ROLE_DEFAULTS: Record<string, Partial<PermissionMatrix>> = {
     aggregators: { view: false, create: false, update: false, delete: false },
     customers: { view: true, create: true, update: true, delete: false },
     staff: { view: false, create: false, update: false, delete: false },
+    suppliers: { view: false, create: false, update: false, delete: false },
     announcements: { view: true, create: false, update: false, delete: false },
     reports: { view: false, create: false, update: false, delete: false },
     settings: { view: false, create: false, update: false, delete: false },
@@ -113,11 +116,15 @@ export async function getPermissionsForRole(role: string): Promise<PermissionMat
     return fallback;
   }
 
-  // Merge DB permissions with defaults — DB values take precedence per resource
+  // Deep-merge: defaults set the base per-resource, DB values override per-action.
+  // This prevents a partial DB entry (e.g. settings.view=false) from silently locking
+  // users out of resources the role is supposed to have access to.
   const dbPerms = row.permissions as PermissionMatrix;
-  const data = defaults
-    ? { ...defaults, ...dbPerms } as PermissionMatrix
-    : dbPerms;
+  const data: PermissionMatrix = {} as PermissionMatrix;
+  for (const r of RESOURCES) {
+    const base = defaults?.[r] ?? { view: false, create: false, update: false, delete: false };
+    data[r] = { ...base, ...(dbPerms[r] ?? {}) };
+  }
   cache.set(role, { data, fetchedAt: Date.now() });
   return data;
 }

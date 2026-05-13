@@ -8,7 +8,7 @@ export type SystemRoleName = "SUPER_ADMIN" | "MANAGER" | "CASHIER";
 export type PermissionAction = "view" | "create" | "update" | "delete";
 export type PermissionResource =
   | "orders" | "sales" | "payments" | "inventory" | "warehouses"
-  | "credit" | "aggregators" | "customers" | "staff"
+  | "credit" | "aggregators" | "customers" | "staff" | "suppliers"
   | "announcements" | "reports" | "settings" | "attendance";
 export type PermissionMatrix = Record<PermissionResource, Record<PermissionAction, boolean>>;
 

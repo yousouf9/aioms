@@ -2,10 +2,13 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { SuppliersManager } from "@/components/dashboard/suppliers-manager";
+import { getPermissionsForRole } from "@/lib/permissions";
 
 export default async function SuppliersPage() {
   const session = await getSession();
   if (!session) redirect("/login");
+  const permissions = await getPermissionsForRole(session.role);
+  if (!permissions.suppliers.view) redirect("/dashboard");
 
   const suppliers = await db.supplier.findMany({
     orderBy: { name: "asc" },

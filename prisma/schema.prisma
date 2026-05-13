@@ -643,6 +643,7 @@ model SupplierPayment {
   amount       Decimal          @db.Decimal(12, 2)
   method       PaymentMethod    @default(CASH)
   reference    String?
+  receiptUrl   String?
   notes        String?
   paidAt       DateTime         @default(now())
   createdAt    DateTime         @default(now())

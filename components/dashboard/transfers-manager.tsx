@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRightLeft, CheckCircle2 } from "lucide-react";
+import { ArrowRightLeft, CheckCircle2, Plus, Search } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
 
 interface TransferRow {
@@ -30,9 +30,17 @@ interface Pagination {
   totalPages: number;
 }
 
+interface LocationOption {
+  id: string;
+  name: string;
+}
+
 interface Props {
   initialTransfers: TransferRow[];
   initialPagination: Pagination;
+  warehouses?: LocationOption[];
+  shops?: LocationOption[];
+  canCreate?: boolean;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -84,7 +92,7 @@ function StatusBadge({ status }: { status: TransferRow["status"] }) {
   );
 }
 
-export function TransfersManager({ initialTransfers, initialPagination }: Props) {
+export function TransfersManager({ initialTransfers, initialPagination, warehouses = [], shops = [], canCreate = false }: Props) {
   const [transfers, setTransfers] = useState<TransferRow[]>(initialTransfers);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [search, setSearch] = useState("");
@@ -93,6 +101,7 @@ export function TransfersManager({ initialTransfers, initialPagination }: Props)
   const [directionFilter, setDirectionFilter] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
   const isFirstRender = useRef(true);
 
   // Debounce search input by 300ms
@@ -144,14 +153,25 @@ export function TransfersManager({ initialTransfers, initialPagination }: Props)
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-        <ArrowRightLeft className="h-6 w-6 text-primary" />
+      <div className="flex items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-3">
-          <h1 className="font-display font-bold text-2xl text-agro-dark">Stock Transfers</h1>
-          <span className="rounded-[6px] px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 font-body">
-            {pagination.total}
-          </span>
+          <ArrowRightLeft className="h-6 w-6 text-primary" />
+          <div className="flex items-center gap-3">
+            <h1 className="font-display font-bold text-2xl text-agro-dark">Stock Transfers</h1>
+            <span className="rounded-[6px] px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 font-body">
+              {pagination.total}
+            </span>
+          </div>
         </div>
+        {canCreate && (
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-2 h-11 px-4 rounded-[8px] bg-primary text-white font-display font-semibold text-sm hover:bg-primary-dark transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            New Transfer
+          </button>
+        )}
       </div>
 
       {/* Filter bar */}
@@ -344,6 +364,234 @@ export function TransfersManager({ initialTransfers, initialPagination }: Props)
           )}
         </>
       )}
+
+      {showCreate && (
+        <CreateTransferModal
+          warehouses={warehouses}
+          shops={shops}
+          onClose={() => setShowCreate(false)}
+          onSaved={() => {
+            setShowCreate(false);
+            fetchTransfers(1, debouncedSearch, statusFilter, directionFilter);
+            setPage(1);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── Create Transfer Modal ─────────────────────────────────────────────────
+
+type SourceType = "warehouse" | "shop";
+type DestType = "warehouse" | "shop";
+
+interface ProductSearchResult {
+  id: string;
+  name: string;
+  unit: string;
+  warehouseStocks: { warehouseId: string; quantity: number }[];
+  shopStocks: { shopId: string; quantity: number }[];
+}
+
+function CreateTransferModal({
+  warehouses,
+  shops,
+  onClose,
+  onSaved,
+}: {
+  warehouses: LocationOption[];
+  shops: LocationOption[];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [sourceType, setSourceType] = useState<SourceType>("warehouse");
+  const [sourceId, setSourceId] = useState("");
+  const [destType, setDestType] = useState<DestType>("shop");
+  const [destId, setDestId] = useState("");
+  const [productSearch, setProductSearch] = useState("");
+  const [productResults, setProductResults] = useState<ProductSearchResult[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<ProductSearchResult | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [notes, setNotes] = useState("");
+  const [immediate, setImmediate] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!productSearch.trim()) { setProductResults([]); return; }
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const res = await fetch(`/api/dashboard/inventory/products?q=${encodeURIComponent(productSearch)}&withStockDetails=1`);
+        const data = await res.json();
+        if (data.success) setProductResults(data.data.slice(0, 8));
+      } finally { setSearchLoading(false); }
+    }, 300);
+  }, [productSearch]);
+
+  function getAvailableQty(): number {
+    if (!selectedProduct) return 0;
+    if (sourceType === "warehouse") {
+      return selectedProduct.warehouseStocks?.find((s) => s.warehouseId === sourceId)?.quantity ?? 0;
+    }
+    return selectedProduct.shopStocks?.find((s) => s.shopId === sourceId)?.quantity ?? 0;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedProduct || !sourceId || !destId) { setError("Fill in all required fields."); return; }
+    if (sourceType === destType && sourceId === destId) { setError("Source and destination cannot be the same."); return; }
+    if (sourceType === "shop" && destType === "shop") { setError("Shop-to-shop transfers are not supported. Use shop → warehouse → shop."); return; }
+    setSaving(true); setError("");
+    try {
+      const body: Record<string, unknown> = {
+        productId: selectedProduct.id,
+        quantity,
+        notes: notes || undefined,
+        immediate,
+      };
+      if (sourceType === "warehouse") body.fromWarehouseId = sourceId;
+      else body.fromShopId = sourceId;
+      if (destType === "warehouse") body.toWarehouseId = destId;
+      else body.toShopId = destId;
+
+      const res = await fetch("/api/dashboard/inventory/transfers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (data.success) onSaved();
+      else setError(data.error ?? "Failed to create transfer");
+    } catch { setError("Connection error"); } finally { setSaving(false); }
+  }
+
+  const availableQty = getAvailableQty();
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-agro-dark/40 overflow-y-auto">
+      <div className="w-full max-w-md bg-white rounded-[12px] shadow-xl my-4">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="font-display font-bold text-lg text-agro-dark">New Stock Transfer</h2>
+          <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-[6px] text-muted hover:bg-gray-100">✕</button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto max-h-[80vh]">
+
+          {/* Source */}
+          <div>
+            <p className="font-body text-xs font-semibold text-muted uppercase tracking-wide mb-2">From (Source)</p>
+            <div className="grid grid-cols-2 gap-2">
+              <select value={sourceType} onChange={(e) => { setSourceType(e.target.value as SourceType); setSourceId(""); }}
+                className="h-11 px-3 rounded-[8px] border border-gray-200 bg-white font-body text-sm text-agro-dark focus:outline-none focus:border-primary">
+                <option value="warehouse">Warehouse</option>
+                <option value="shop">Shop</option>
+              </select>
+              <select required value={sourceId} onChange={(e) => setSourceId(e.target.value)}
+                className="h-11 px-3 rounded-[8px] border border-gray-200 bg-white font-body text-sm text-agro-dark focus:outline-none focus:border-primary">
+                <option value="">Select…</option>
+                {(sourceType === "warehouse" ? warehouses : shops).map((loc) => (
+                  <option key={loc.id} value={loc.id}>{loc.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Destination */}
+          <div>
+            <p className="font-body text-xs font-semibold text-muted uppercase tracking-wide mb-2">To (Destination)</p>
+            <div className="grid grid-cols-2 gap-2">
+              <select value={destType} onChange={(e) => { setDestType(e.target.value as DestType); setDestId(""); }}
+                className="h-11 px-3 rounded-[8px] border border-gray-200 bg-white font-body text-sm text-agro-dark focus:outline-none focus:border-primary">
+                <option value="shop">Shop</option>
+                <option value="warehouse">Warehouse</option>
+              </select>
+              <select required value={destId} onChange={(e) => setDestId(e.target.value)}
+                className="h-11 px-3 rounded-[8px] border border-gray-200 bg-white font-body text-sm text-agro-dark focus:outline-none focus:border-primary">
+                <option value="">Select…</option>
+                {(destType === "warehouse" ? warehouses : shops).map((loc) => (
+                  <option key={loc.id} value={loc.id}>{loc.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Product search */}
+          <div>
+            <p className="font-body text-xs font-semibold text-muted uppercase tracking-wide mb-2">Product</p>
+            {selectedProduct ? (
+              <div className="flex items-center justify-between p-3 rounded-[8px] border border-primary/30 bg-primary/5">
+                <div>
+                  <p className="font-body text-sm font-medium text-agro-dark">{selectedProduct.name}</p>
+                  {sourceId && <p className="font-body text-xs text-muted mt-0.5">Available: {availableQty} {selectedProduct.unit.toLowerCase()}</p>}
+                </div>
+                <button type="button" onClick={() => setSelectedProduct(null)} className="text-muted hover:text-red-500 transition-colors">✕</button>
+              </div>
+            ) : (
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted pointer-events-none" />
+                <input type="text" value={productSearch} onChange={(e) => setProductSearch(e.target.value)}
+                  placeholder="Search product…"
+                  className="w-full h-11 pl-9 pr-3 rounded-[8px] border border-gray-200 bg-white font-body text-sm text-agro-dark focus:outline-none focus:border-primary" />
+                {(productResults.length > 0 || searchLoading) && (
+                  <div className="absolute top-12 left-0 right-0 bg-white border border-gray-200 rounded-[8px] shadow-lg z-20 overflow-hidden">
+                    {searchLoading ? (
+                      <p className="px-3 py-2 text-xs text-muted font-body">Searching…</p>
+                    ) : productResults.map((p) => (
+                      <button key={p.id} type="button" onClick={() => { setSelectedProduct(p); setProductSearch(""); setProductResults([]); }}
+                        className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 transition-colors text-left">
+                        <p className="font-body text-sm text-agro-dark">{p.name}</p>
+                        <p className="text-xs text-muted">{p.unit}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Quantity */}
+          <div>
+            <label className="block font-body text-xs text-muted mb-1">Quantity *</label>
+            <input type="number" min={1} max={availableQty || undefined} required value={quantity || ""}
+              onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1) setQuantity(v); }}
+              onBlur={(e) => { if (!e.target.value || parseInt(e.target.value) < 1) setQuantity(1); }}
+              className="w-full h-11 px-3 rounded-[8px] border border-gray-200 bg-white font-body text-sm text-agro-dark focus:outline-none focus:border-primary" />
+            {selectedProduct && sourceId && availableQty > 0 && (
+              <p className="font-body text-xs text-muted mt-1">Max available: {availableQty}</p>
+            )}
+          </div>
+
+          {/* Mode */}
+          <div className="flex items-center gap-3 p-3 rounded-[8px] bg-gray-50 border border-gray-200">
+            <input type="checkbox" id="immediate" checked={immediate} onChange={(e) => setImmediate(e.target.checked)}
+              className="h-4 w-4 accent-primary" />
+            <label htmlFor="immediate" className="font-body text-sm text-agro-dark">
+              Complete immediately (bypass approval)
+            </label>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="block font-body text-xs text-muted mb-1">Notes (optional)</label>
+            <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)}
+              className="w-full px-3 py-2 rounded-[8px] border border-gray-200 bg-white font-body text-sm text-agro-dark focus:outline-none focus:border-primary resize-none" />
+          </div>
+
+          {error && <p className="text-red-500 text-sm font-body">{error}</p>}
+
+          <div className="flex gap-2 pt-1">
+            <button type="button" onClick={onClose} className="flex-1 h-11 rounded-[8px] border border-gray-200 text-agro-dark font-body text-sm hover:bg-gray-50">Cancel</button>
+            <button type="submit" disabled={saving || !selectedProduct || !sourceId || !destId}
+              className="flex-1 h-11 rounded-[8px] bg-primary text-white font-display font-semibold text-sm disabled:opacity-60 hover:bg-primary-dark transition-colors">
+              {saving ? "Creating…" : "Create Transfer"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

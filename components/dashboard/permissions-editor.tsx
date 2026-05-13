@@ -7,7 +7,7 @@ import type { PermissionMatrix, PermissionResource, PermissionAction } from "@/t
 
 const RESOURCES: PermissionResource[] = [
   "orders", "sales", "payments", "inventory", "warehouses",
-  "credit", "aggregators", "customers", "staff",
+  "credit", "aggregators", "customers", "staff", "suppliers",
   "announcements", "reports", "settings", "attendance",
 ];
 
@@ -21,6 +21,7 @@ const RESOURCE_LABELS: Record<PermissionResource, string> = {
   aggregators: "Aggregators",
   customers: "Customers",
   staff: "Staff",
+  suppliers: "Suppliers",
   announcements: "Announcements",
   reports: "Reports",
   settings: "Settings",

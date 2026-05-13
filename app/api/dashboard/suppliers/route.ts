@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { requirePermission } from "@/lib/permissions";
 import type { ApiResponse } from "@/types";
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json<ApiResponse>({ success: false, error: "Unauthorized" }, { status: 401 });
+    const denied = await requirePermission(session, "suppliers", "view");
+    if (denied) return denied;
 
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q");
@@ -64,6 +67,8 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json<ApiResponse>({ success: false, error: "Unauthorized" }, { status: 401 });
+    const denied = await requirePermission(session, "suppliers", "create");
+    if (denied) return denied;
 
     const body = await req.json() as { name: string; phone: string; email?: string; address?: string; notes?: string };
 

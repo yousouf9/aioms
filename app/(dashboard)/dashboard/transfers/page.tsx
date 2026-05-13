@@ -9,7 +9,7 @@ export default async function TransfersPage() {
 
   const PAGE_SIZE = 25;
 
-  const [transfers, total] = await Promise.all([
+  const [transfers, total, warehouses, shops] = await Promise.all([
     db.stockTransfer.findMany({
       orderBy: { createdAt: "desc" },
       take: PAGE_SIZE,
@@ -24,6 +24,8 @@ export default async function TransfersPage() {
       },
     }),
     db.stockTransfer.count(),
+    db.warehouse.findMany({ where: { isActive: true }, select: { id: true, name: true, type: true }, orderBy: { name: "asc" } }),
+    db.shop.findMany({ where: { isActive: true }, select: { id: true, name: true, warehouseId: true }, orderBy: { name: "asc" } }),
   ]);
 
   return (
@@ -38,6 +40,9 @@ export default async function TransfersPage() {
         total,
         totalPages: Math.ceil(total / PAGE_SIZE),
       }}
+      warehouses={warehouses}
+      shops={shops}
+      canCreate={session.role === "SUPER_ADMIN" || session.role === "MANAGER"}
     />
   );
 }

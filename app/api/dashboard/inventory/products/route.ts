@@ -14,6 +14,8 @@ export async function GET(req: NextRequest) {
     const categoryId = searchParams.get("categoryId");
     const q = searchParams.get("q");
 
+    const withStockDetails = searchParams.get("withStockDetails") === "1";
+
     const where: Record<string, unknown> = { isActive: true };
     if (categoryId) where.categoryId = categoryId;
     if (q) where.name = { contains: q, mode: "insensitive" };
@@ -50,6 +52,10 @@ export async function GET(req: NextRequest) {
           shopStock: shopTotal,
           totalStock: warehouseTotal + shopTotal,
           isLowStock: (warehouseTotal + shopTotal) <= p.lowStockThreshold,
+          ...(withStockDetails ? {
+            warehouseStocks: p.warehouseStocks,
+            shopStocks: p.shopStocks,
+          } : {}),
         };
       }),
     });

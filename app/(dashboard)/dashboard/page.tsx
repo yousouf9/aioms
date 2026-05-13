@@ -16,6 +16,7 @@ async function getDashboardData() {
   const [
     ordersToday,
     revenueResult,
+    salesResult,
     lowStockProducts,
     overdueCredits,
     pendingTransfers,
@@ -34,6 +35,10 @@ async function getDashboardData() {
         confirmedAt: { gte: today, lt: tomorrow },
       },
       _sum: { amount: true },
+    }),
+    db.sale.aggregate({
+      where: { createdAt: { gte: today, lt: tomorrow } },
+      _sum: { total: true },
     }),
     db.$queryRaw<{ count: bigint }[]>`
       SELECT COUNT(DISTINCT p.id) as count FROM products p
@@ -84,7 +89,7 @@ async function getDashboardData() {
 
   return {
     ordersToday,
-    todayRevenue: revenueResult._sum.amount?.toNumber() ?? 0,
+    todayRevenue: (revenueResult._sum.amount?.toNumber() ?? 0) + (salesResult._sum.total?.toNumber() ?? 0),
     lowStockProducts: Number((lowStockProducts as { count: bigint }[])[0]?.count ?? 0),
     overdueCredits,
     pendingTransfers,

@@ -320,6 +320,13 @@ interface OrderLineItem {
   quantity: number;
 }
 
+interface CustomerResult {
+  id: string;
+  name: string;
+  phone: string;
+  email: string | null;
+}
+
 function CreateOrderModal({
   onClose,
   onSaved,
@@ -331,6 +338,7 @@ function CreateOrderModal({
     customerName: "",
     customerPhone: "",
     customerEmail: "",
+    customerId: "",
     source: "WALK_IN",
     deliveryMethod: "PICKUP",
     deliveryAddress: "",
@@ -339,10 +347,14 @@ function CreateOrderModal({
   const [items, setItems] = useState<OrderLineItem[]>([]);
   const [productSearch, setProductSearch] = useState("");
   const [productResults, setProductResults] = useState<ProductResult[]>([]);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerResults, setCustomerResults] = useState<CustomerResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [customerSearchLoading, setCustomerSearchLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const customerSearchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!productSearch.trim()) { setProductResults([]); return; }
@@ -358,6 +370,27 @@ function CreateOrderModal({
       }
     }, 300);
   }, [productSearch]);
+
+  useEffect(() => {
+    if (!customerSearch.trim()) { setCustomerResults([]); return; }
+    if (customerSearchTimeout.current) clearTimeout(customerSearchTimeout.current);
+    customerSearchTimeout.current = setTimeout(async () => {
+      setCustomerSearchLoading(true);
+      try {
+        const res = await fetch(`/api/dashboard/customers?q=${encodeURIComponent(customerSearch)}&pageSize=6`);
+        const data = await res.json();
+        if (data.success) setCustomerResults(data.data ?? []);
+      } finally {
+        setCustomerSearchLoading(false);
+      }
+    }, 300);
+  }, [customerSearch]);
+
+  function selectCustomer(c: CustomerResult) {
+    setForm((f) => ({ ...f, customerName: c.name, customerPhone: c.phone, customerEmail: c.email ?? "", customerId: c.id }));
+    setCustomerSearch("");
+    setCustomerResults([]);
+  }
 
   function addItem(product: ProductResult) {
     setItems((prev) => {
@@ -393,6 +426,7 @@ function CreateOrderModal({
           customerName: form.customerName,
           customerPhone: form.customerPhone,
           customerEmail: form.customerEmail || undefined,
+          customerId: form.customerId || undefined,
           source: form.source,
           deliveryMethod: form.deliveryMethod,
           deliveryAddress: form.deliveryAddress || undefined,
@@ -425,6 +459,45 @@ function CreateOrderModal({
           {/* Customer info */}
           <div>
             <p className="font-body text-xs font-semibold text-muted uppercase tracking-wide mb-2">Customer</p>
+
+            {/* Customer search — find existing */}
+            <div className="relative mb-3">
+              <input
+                type="text"
+                placeholder="Search existing customers…"
+                value={customerSearch}
+                onChange={(e) => setCustomerSearch(e.target.value)}
+                className="w-full h-11 px-3 rounded-[8px] border border-gray-200 bg-white font-body text-sm text-agro-dark focus:outline-none focus:border-primary transition-colors"
+              />
+              {(customerResults.length > 0 || customerSearchLoading) && (
+                <div className="absolute top-12 left-0 right-0 bg-white border border-gray-200 rounded-[8px] shadow-lg z-20 overflow-hidden">
+                  {customerSearchLoading ? (
+                    <p className="px-3 py-2 text-xs text-muted font-body">Searching…</p>
+                  ) : (
+                    customerResults.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => selectCustomer(c)}
+                        className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 transition-colors text-left"
+                      >
+                        <div>
+                          <p className="font-body text-sm text-agro-dark">{c.name}</p>
+                          <p className="text-xs text-muted">{c.phone}</p>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+            {form.customerId && (
+              <div className="mb-2 px-3 py-2 bg-primary/5 border border-primary/20 rounded-[8px] flex items-center justify-between">
+                <p className="font-body text-xs text-primary">Linked to existing customer</p>
+                <button type="button" onClick={() => setForm((f) => ({ ...f, customerId: "" }))} className="text-xs text-muted hover:text-agro-dark">✕ Unlink</button>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2 sm:col-span-1">
                 <label className="block font-body text-xs text-muted mb-1">Name *</label>
@@ -546,8 +619,12 @@ function CreateOrderModal({
                   <input
                     type="number"
                     min={1}
-                    value={item.quantity}
-                    onChange={(e) => updateQty(item.productId, parseInt(e.target.value) || 1)}
+                    value={item.quantity || ""}
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value);
+                      if (!isNaN(v) && v >= 1) updateQty(item.productId, v);
+                    }}
+                    onBlur={(e) => { if (!e.target.value || parseInt(e.target.value) < 1) updateQty(item.productId, 1); }}
                     className="w-16 h-9 px-2 text-center rounded-[6px] border border-gray-200 font-body text-sm focus:outline-none focus:border-primary"
                   />
                   <p className="w-20 text-right font-display font-semibold text-sm text-agro-dark">

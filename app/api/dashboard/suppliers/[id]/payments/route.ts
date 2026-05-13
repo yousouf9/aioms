@@ -13,6 +13,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       amount: number;
       method?: string;
       reference?: string;
+      receiptUrl?: string;
       notes?: string;
       deliveryId?: string;
       paidAt?: string;
@@ -28,6 +29,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         amount: body.amount,
         method: (body.method as "CASH" | "TRANSFER" | "POS" | "ONLINE") || "CASH",
         reference: body.reference?.trim() || null,
+        receiptUrl: body.receiptUrl?.trim() || null,
         notes: body.notes?.trim() || null,
         deliveryId: body.deliveryId || null,
         paidAt: body.paidAt ? new Date(body.paidAt) : new Date(),

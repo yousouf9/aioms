@@ -537,9 +537,12 @@ function NewCreditModal({ warehouses, shops, onClose, onCreated }: {
                         </div>
                       )}
                     </div>
-                    <input type="number" min={1} value={line.quantity} onChange={(e) => updateLine(idx, "quantity", parseInt(e.target.value) || 1)}
+                    <input type="number" min={1} value={line.quantity || ""}
+                      onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1) updateLine(idx, "quantity", v); }}
+                      onBlur={(e) => { if (!e.target.value || parseInt(e.target.value) < 1) updateLine(idx, "quantity", 1); }}
                       className="w-20 h-11 px-3 rounded-[8px] bg-white border border-gray-200 font-body text-sm text-agro-dark focus:outline-none focus:border-primary" />
-                    <input type="number" min={0} step="0.01" value={line.unitPrice} onChange={(e) => updateLine(idx, "unitPrice", parseFloat(e.target.value) || 0)}
+                    <input type="number" min={0} step="0.01" value={line.unitPrice || ""}
+                      onChange={(e) => { const v = parseFloat(e.target.value); updateLine(idx, "unitPrice", isNaN(v) ? 0 : v); }}
                       placeholder="Price"
                       className="w-28 h-11 px-3 rounded-[8px] bg-white border border-gray-200 font-body text-sm text-agro-dark focus:outline-none focus:border-primary" />
                     {lines.length > 1 && (
@@ -682,8 +685,13 @@ export function RecordPaymentModal({ credit, onClose, onPaid }: {
             <label className="block font-body text-xs text-muted mb-1">Payment Method *</label>
             <select value={method} onChange={(e) => setMethod(e.target.value)}
               className="w-full h-11 px-3 rounded-[8px] bg-white border border-gray-200 font-body text-sm text-agro-dark focus:outline-none focus:border-primary">
-              {["CASH", "BANK_TRANSFER", "MOBILE_MONEY", "CARD", "OTHER"].map((m) => (
-                <option key={m} value={m}>{m.replace("_", " ")}</option>
+              {[
+                { value: "CASH", label: "Cash" },
+                { value: "TRANSFER", label: "Bank Transfer" },
+                { value: "POS", label: "POS (Card)" },
+                { value: "ONLINE", label: "Online Payment" },
+              ].map(({ value, label }) => (
+                <option key={value} value={value}>{label}</option>
               ))}
             </select>
           </div>

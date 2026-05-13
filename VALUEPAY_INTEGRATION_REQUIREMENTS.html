@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valuepay Payment Gateway — Integration & KYC Requirements</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+      padding: 0;
+    }
+
+    .page {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 56px;
+    }
+
+    /* ── Header ── */
+    .doc-header {
+      border-bottom: 3px solid #43A047;
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    .doc-header .logo-line {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .logo-text {
+      font-size: 22pt;
+      font-weight: 700;
+      color: #43A047;
+      letter-spacing: -0.5px;
+    }
+
+    .doc-header h1 {
+      font-size: 17pt;
+      font-weight: 700;
+      color: #1B2631;
+      margin-bottom: 6px;
+    }
+
+    .doc-header .meta {
+      font-size: 9.5pt;
+      color: #666;
+    }
+
+    .doc-header .meta span { margin-right: 20px; }
+
+    /* ── Sections ── */
+    .section {
+      margin-bottom: 36px;
+    }
+
+    .section-title {
+      font-size: 13pt;
+      font-weight: 700;
+      color: #1B2631;
+      border-left: 4px solid #43A047;
+      padding-left: 12px;
+      margin-bottom: 16px;
+    }
+
+    .section-intro {
+      color: #444;
+      margin-bottom: 16px;
+      font-size: 10.5pt;
+    }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+      font-size: 10pt;
+    }
+
+    thead tr {
+      background: #1B2631;
+      color: #fff;
+    }
+
+    thead th {
+      padding: 9px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 9.5pt;
+      letter-spacing: 0.3px;
+    }
+
+    tbody tr:nth-child(even) { background: #f8faf8; }
+    tbody tr:hover { background: #f0f7f0; }
+
+    tbody td {
+      padding: 8px 14px;
+      border-bottom: 1px solid #e8e8e8;
+      vertical-align: top;
+    }
+
+    td.label {
+      font-weight: 600;
+      color: #1B2631;
+      white-space: nowrap;
+      width: 35%;
+    }
+
+    td.required {
+      text-align: center;
+      width: 12%;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 8.5pt;
+      font-weight: 600;
+    }
+
+    .badge-required { background: #fee2e2; color: #b91c1c; }
+    .badge-optional { background: #fef3c7; color: #92400e; }
+    .badge-if       { background: #dbeafe; color: #1d4ed8; }
+
+    /* ── URL boxes ── */
+    .url-box {
+      background: #f4f8f4;
+      border: 1px solid #c8e6c9;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 8px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 10pt;
+      color: #1B2631;
+      word-break: break-all;
+    }
+
+    .url-label {
+      font-size: 9pt;
+      font-weight: 600;
+      color: #43A047;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    /* ── Notice boxes ── */
+    .notice {
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin: 16px 0;
+      font-size: 10pt;
+    }
+
+    .notice-info  { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e3a5f; }
+    .notice-warn  { background: #fffbeb; border-left: 4px solid #f59e0b; color: #78350f; }
+    .notice-green { background: #f0fdf4; border-left: 4px solid #43A047; color: #14532d; }
+
+    .notice strong { font-weight: 700; display: block; margin-bottom: 4px; }
+
+    /* ── Steps ── */
+    ol.steps { padding-left: 0; list-style: none; counter-reset: step; }
+
+    ol.steps li {
+      counter-increment: step;
+      display: flex;
+      gap: 14px;
+      margin-bottom: 14px;
+      align-items: flex-start;
+    }
+
+    ol.steps li::before {
+      content: counter(step);
+      background: #43A047;
+      color: #fff;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9pt;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    ol.steps li .step-text {
+      flex: 1;
+      color: #333;
+    }
+
+    ol.steps li .step-text strong { display: block; color: #1B2631; margin-bottom: 2px; }
+
+    /* ── Two-col layout ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .info-card {
+      background: #f8faf8;
+      border: 1px solid #d4efd4;
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .info-card h4 {
+      font-size: 10pt;
+      font-weight: 700;
+      color: #1B2631;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #e0efe0;
+      padding-bottom: 6px;
+    }
+
+    .info-card p, .info-card li {
+      font-size: 9.5pt;
+      color: #444;
+      margin-bottom: 4px;
+    }
+
+    .info-card ul { padding-left: 16px; }
+
+    /* ── Footer ── */
+    .doc-footer {
+      border-top: 2px solid #e0e0e0;
+      padding-top: 20px;
+      margin-top: 40px;
+      text-align: center;
+      font-size: 9pt;
+      color: #888;
+    }
+
+    .doc-footer .nakowa { color: #43A047; font-weight: 700; }
+
+    /* ── Print ── */
+    @media print {
+      body { padding: 0; }
+      .page { padding: 30px 40px; }
+      .no-break { page-break-inside: avoid; }
+      h2, h3 { page-break-after: avoid; }
+      .section { page-break-inside: avoid; }
+    }
+
+    /* ── Sub-headings ── */
+    h3 {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #1B2631;
+      margin: 20px 0 10px;
+    }
+
+    ul.plain-list { padding-left: 18px; }
+    ul.plain-list li { margin-bottom: 5px; font-size: 10.5pt; color: #333; }
+
+    .divider { border: none; border-top: 1px solid #e0e0e0; margin: 28px 0; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- HEADER                                                     -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="doc-header">
+    <div class="logo-line">
+      <span class="logo-text">Nakowa</span>
+    </div>
+    <h1>Valuepay Payment Gateway — Integration &amp; KYC Requirements</h1>
+    <div class="meta">
+      <span><strong>Prepared for:</strong> Nakowa Agricultural Supplies</span>
+      <span><strong>Website:</strong> nakowa.com.ng</span>
+      <span><strong>Date:</strong> May 2026</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: OVERVIEW                                        -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">1. Overview</div>
+    <p class="section-intro">
+      The Nakowa AIOMS (Agricultural Inventory &amp; Operations Management System) is integrated with
+      <strong>Valuepay</strong> as its online payment gateway. Valuepay enables Nakowa customers to pay for
+      orders via <strong>card</strong>, <strong>bank transfer</strong>, <strong>USSD</strong>, and
+      <strong>QR code</strong> — directly from the website.
+    </p>
+    <p class="section-intro">
+      To go live with online payments, a <strong>verified Valuepay merchant account</strong> must be created
+      for Nakowa. This document outlines everything needed: KYC documents, technical configuration, and
+      dashboard settings.
+    </p>
+    <div class="notice notice-info">
+      <strong>Contact Valuepay</strong>
+      Valuepay is operated by Konplit Technologies. To begin merchant onboarding, contact them at
+      <strong>valuepay.konplit.com</strong> or reach out via their support channels. Mention that you need a
+      merchant account for an agricultural e-commerce and inventory management platform.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: KYC DOCUMENTS                                   -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="section no-break">
+    <div class="section-title">2. KYC (Know Your Customer) Documents</div>
+    <p class="section-intro">
+      Nigerian payment processors are regulated by the <strong>Central Bank of Nigeria (CBN)</strong> and
+      require KYC verification before activating a merchant account. The following documents will be
+      requested during onboarding.
+    </p>
+
+    <h3>2.1 — Business / Company Documents</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:38%">Document</th>
+          <th style="width:12%;text-align:center">Required</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label">CAC Certificate of Incorporation</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>Certificate issued by the Corporate Affairs Commission (CAC) showing the business is registered in Nigeria. Include the RC number.</td>
+        </tr>
+        <tr>
+          <td class="label">CAC Status Report (Form CAC 1.1)</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>Current status report showing directors, shareholders, and registered office address. Obtainable from the CAC portal or a CAC-accredited agent.</td>
+        </tr>
+        <tr>
+          <td class="label">Memorandum &amp; Articles of Association (MEMART)</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>For registered companies (Ltd/PLC). Not required for sole proprietorships or partnerships — submit Business Name registration instead.</td>
+        </tr>
+        <tr>
+          <td class="label">Business Name Registration Certificate</td>
+          <td class="required"><span class="badge badge-if">If applicable</span></td>
+          <td>Required if the business operates as a sole proprietorship or partnership under a business name, rather than a limited company.</td>
+        </tr>
+        <tr>
+          <td class="label">Tax Identification Number (TIN)</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>Issued by the Federal Inland Revenue Service (FIRS). Obtainable online at tin.jtb.gov.ng or at a FIRS office.</td>
+        </tr>
+        <tr>
+          <td class="label">Board Resolution / Directors' Resolution</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>A formal resolution from the board of directors authorising the company to open a payment gateway account and nominating the signatory. Must be on company letterhead, signed, and dated.</td>
+        </tr>
+        <tr>
+          <td class="label">SCUML Certificate</td>
+          <td class="required"><span class="badge badge-if">If applicable</span></td>
+          <td>Special Control Unit against Money Laundering certificate. Required for businesses in designated non-financial businesses and professions (DNFBPs). Agricultural commodity trading businesses may be required to register. Check with your legal adviser.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>2.2 — Director / Business Owner Personal Documents</h3>
+    <p style="font-size:10pt;color:#555;margin-bottom:10px;">
+      Required for each director, major shareholder (≥5% ownership), or the primary account signatory.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:38%">Document</th>
+          <th style="width:12%;text-align:center">Required</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label">Valid Government-Issued ID</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>
+            Any <em>one</em> of the following (must be valid and not expired):
+            <ul style="margin-top:4px;padding-left:16px;font-size:9.5pt;">
+              <li>National Identity Card (NIN Slip / ID Card)</li>
+              <li>International Passport (data page)</li>
+              <li>Driver's Licence</li>
+              <li>Permanent Voter's Card (PVC)</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="label">BVN (Bank Verification Number)</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>BVN of each director / signatory. This is verified electronically against NIBSS records. Dial <strong>*565*0#</strong> on your registered phone to retrieve your BVN.</td>
+        </tr>
+        <tr>
+          <td class="label">NIN (National Identification Number)</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>11-digit NIN for each director. Dial <strong>*346#</strong> to retrieve your NIN.</td>
+        </tr>
+        <tr>
+          <td class="label">Passport Photograph</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>Recent colour passport photograph (white background, plain clothing) for each director / signatory. Soft copy (JPG/PNG) acceptable for online submission.</td>
+        </tr>
+        <tr>
+          <td class="label">Proof of Address</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>
+            Any <em>one</em> dated within the last 3 months:
+            <ul style="margin-top:4px;padding-left:16px;font-size:9.5pt;">
+              <li>Utility bill (electricity, water, DSTV)</li>
+              <li>Bank statement (with address printed)</li>
+              <li>Government-issued address letter</li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>2.3 — Bank Account &amp; Financial Documents</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:38%">Document</th>
+          <th style="width:12%;text-align:center">Required</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label">Business Bank Account Details</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>Account name, account number, and bank name of the business's Nigerian bank account. Settlements from Valuepay will be paid into this account.</td>
+        </tr>
+        <tr>
+          <td class="label">3–6 Months Bank Statement</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>Bank statement for the business account showing recent transactions. Must be stamped and signed by the bank (or downloaded from internet banking as an official PDF).</td>
+        </tr>
+        <tr>
+          <td class="label">Voided Cheque or Account Confirmation Letter</td>
+          <td class="required"><span class="badge badge-optional">Optional</span></td>
+          <td>Some processors request a voided cheque or a letter from the bank confirming the account details, for settlement verification purposes.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>2.4 — Business Verification Documents</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:38%">Document</th>
+          <th style="width:12%;text-align:center">Required</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label">Business Address Proof</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>Utility bill or tenancy/lease agreement for the business premises at Anguwan Jaba, Lafia, Nasarawa State — dated within 3 months.</td>
+        </tr>
+        <tr>
+          <td class="label">Photographs of Business Premises</td>
+          <td class="required"><span class="badge badge-optional">Optional</span></td>
+          <td>Some processors request photos of the shop front, interior, and signage to verify the business is operational.</td>
+        </tr>
+        <tr>
+          <td class="label">Website / App Description</td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>Brief description of how payments are collected (e.g. customers place orders on nakowa.com.ng, pay via Valuepay checkout, goods are delivered or collected). Include the live website URL.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notice notice-warn">
+      <strong>Document Preparation Tips</strong>
+      All documents should be clear, legible, and in PDF or high-resolution JPG/PNG format.
+      Physical documents must be scanned — do not submit photos taken with poor lighting.
+      Ensure all documents are in English or accompanied by a certified translation.
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: TECHNICAL CONFIGURATION                         -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="section no-break">
+    <div class="section-title">3. Technical Configuration</div>
+    <p class="section-intro">
+      Once the merchant account is approved, Valuepay will provide API credentials.
+      The developer (or hosting team) must configure the following in the server environment.
+    </p>
+
+    <h3>3.1 — API Credentials (from Valuepay Dashboard)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Environment Variable</th>
+          <th style="width:12%;text-align:center">Required</th>
+          <th>Where to Find</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label"><code>VALUEPAY_PRIVATE_KEY</code></td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>Valuepay Merchant Dashboard → Settings → API Keys → Private Key. Starts with <code>KP_</code>. Used server-side only — never expose in browser.</td>
+        </tr>
+        <tr>
+          <td class="label"><code>VALUEPAY_ENCRYPTION_KEY</code></td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>Valuepay Merchant Dashboard → Settings → API Keys → Encryption Key. Starts with <code>KP_ENC_</code>. Used to verify that webhook events genuinely originate from Valuepay.</td>
+        </tr>
+        <tr>
+          <td class="label"><code>VALUEPAY_BASE_URL</code></td>
+          <td class="required"><span class="badge badge-optional">Pre-set</span></td>
+          <td>Default: <code>https://valuepay.konplit.com/v1</code>. Leave unchanged unless Valuepay explicitly provides a different API endpoint.</td>
+        </tr>
+        <tr>
+          <td class="label"><code>NEXT_PUBLIC_APP_URL</code></td>
+          <td class="required"><span class="badge badge-required">Required</span></td>
+          <td>The live domain of the Nakowa website (e.g. <code>https://nakowa.com.ng</code>). This is used to automatically generate the correct webhook and redirect URLs for Valuepay.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3.2 — URLs to Register in Valuepay Dashboard</h3>
+    <p style="font-size:10pt;color:#555;margin-bottom:12px;">
+      After logging into the Valuepay merchant dashboard, navigate to
+      <strong>Settings → Webhooks / Notifications</strong> and add both URLs below.
+      Replace <code>nakowa.com.ng</code> with the actual live domain when it is deployed.
+    </p>
+
+    <div class="url-label">Webhook URL (Payment Notification Endpoint)</div>
+    <div class="url-box">https://nakowa.com.ng/api/webhooks/valuepay</div>
+    <p style="font-size:9.5pt;color:#555;margin-bottom:14px;">
+      Valuepay will POST a notification to this URL whenever a customer's payment is completed, failed,
+      or reversed. The system uses this to automatically mark orders as paid.
+      Enable the <strong>transaction.completed</strong> event (and optionally <strong>transaction.failed</strong>).
+    </p>
+
+    <div class="url-label">Payment Return / Redirect URL</div>
+    <div class="url-box">https://nakowa.com.ng/payment/return</div>
+    <p style="font-size:9.5pt;color:#555;margin-bottom:14px;">
+      After a customer completes (or cancels) payment on the Valuepay checkout page,
+      they are redirected back to this URL. The system then verifies the transaction
+      and shows the customer a confirmation.
+    </p>
+
+    <div class="notice notice-warn">
+      <strong>Important — Live Domain Required</strong>
+      Valuepay cannot send webhooks to <code>localhost</code> or local development environments.
+      Both URLs must use the live, publicly accessible domain (e.g. <code>https://nakowa.com.ng</code>)
+      and must support HTTPS. Ensure SSL/TLS is active on the domain before going live.
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 4: ONBOARDING STEPS                                -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="section no-break">
+    <div class="section-title">4. Merchant Onboarding Steps</div>
+    <ol class="steps">
+      <li>
+        <div class="step-text">
+          <strong>Register on the Valuepay Merchant Portal</strong>
+          Visit <code>valuepay.konplit.com</code>, click "Create Account" / "Become a Merchant",
+          and complete the registration form with the business name, email, and phone number.
+        </div>
+      </li>
+      <li>
+        <div class="step-text">
+          <strong>Submit KYC Documents</strong>
+          Upload all required documents from Section 2 of this document.
+          Ensure files are clear and below the portal's maximum file size (usually 5 MB per file).
+        </div>
+      </li>
+      <li>
+        <div class="step-text">
+          <strong>Await Account Verification</strong>
+          Valuepay's compliance team reviews the documents. This typically takes
+          <strong>2–5 business days</strong>. You may be contacted for additional documents or clarification.
+        </div>
+      </li>
+      <li>
+        <div class="step-text">
+          <strong>Receive API Credentials</strong>
+          Once verified, your merchant dashboard will show your <strong>Private Key</strong> and
+          <strong>Encryption Key</strong> under Settings → API Keys. Copy both keys and send them
+          securely to the developer for configuration.
+        </div>
+      </li>
+      <li>
+        <div class="step-text">
+          <strong>Developer Configures the System</strong>
+          The developer adds the API keys to the server environment and registers the webhook
+          and redirect URLs in the Valuepay dashboard (as specified in Section 3.2).
+        </div>
+      </li>
+      <li>
+        <div class="step-text">
+          <strong>Test Mode Verification</strong>
+          Use Valuepay's test/sandbox mode to place a test order and verify the full payment
+          flow works — from checkout to order confirmation. The developer will confirm this.
+        </div>
+      </li>
+      <li>
+        <div class="step-text">
+          <strong>Go Live</strong>
+          Switch the system from test mode to live mode by replacing test keys with live keys.
+          Online payments are now active on nakowa.com.ng.
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 5: SETTLEMENT                                      -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="section no-break">
+    <div class="section-title">5. Settlement &amp; Fees</div>
+    <p class="section-intro">
+      The following are standard Valuepay terms — confirm exact rates with Valuepay during onboarding
+      as they may negotiate rates based on business volume.
+    </p>
+
+    <div class="two-col">
+      <div class="info-card">
+        <h4>Settlement Timeline</h4>
+        <ul>
+          <li>Card &amp; USSD: T+1 business day</li>
+          <li>Bank Transfer: Same day or T+1</li>
+          <li>Settlement is to the registered business bank account</li>
+          <li>Settlement reports available in the merchant dashboard</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h4>Typical Fee Structure</h4>
+        <ul>
+          <li>Transaction fee: ~1.5% per transaction</li>
+          <li>Cap: usually ₦2,000 per transaction</li>
+          <li>International cards: higher rate (~3.9%)</li>
+          <li>Confirm exact rates with Valuepay</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="notice notice-green">
+      <strong>Tip — Charge Customers the Fee</strong>
+      The system can be configured to add the payment gateway fee on top of the order total
+      so that Nakowa does not bear the transaction cost. Discuss this with the developer
+      if you want this enabled.
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 6: INFORMATION TO SHARE WITH DEVELOPER            -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="section no-break">
+    <div class="section-title">6. Information to Share with the Developer</div>
+    <p class="section-intro">
+      Once the Valuepay merchant account is approved and active, send the developer the following:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Example / Format</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label">Valuepay Private Key</td>
+          <td><code>KP_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code></td>
+        </tr>
+        <tr>
+          <td class="label">Valuepay Encryption Key</td>
+          <td><code>KP_ENC_xxxxxxxxxxxxxxxxxxxxxxxx</code></td>
+        </tr>
+        <tr>
+          <td class="label">Live Domain / App URL</td>
+          <td><code>https://nakowa.com.ng</code></td>
+        </tr>
+        <tr>
+          <td class="label">Business WhatsApp Number</td>
+          <td>Format: digits only, no +, e.g. <code>2348012345678</code></td>
+        </tr>
+        <tr>
+          <td class="label">Confirmed Settlement Bank Account</td>
+          <td>Account name, number, and bank</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notice notice-warn">
+      <strong>Security — Handle API Keys with Care</strong>
+      API keys provide direct access to your payment account.
+      Never share them via WhatsApp, SMS, or email in plain text.
+      Use a secure channel such as a password manager share link or a confidential document.
+      Do not commit keys to GitHub or any version control system.
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 7: CHECKLIST                                       -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="section no-break">
+    <div class="section-title">7. Pre-Launch Checklist</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:5%"></th>
+          <th>Item</th>
+          <th style="width:25%">Owner</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>☐</td>
+          <td>CAC Certificate and Status Report gathered</td>
+          <td>Business / Owner</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>TIN obtained from FIRS</td>
+          <td>Business / Owner</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>Director's valid ID, BVN, NIN, and passport photo ready</td>
+          <td>Business / Owner</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>Board resolution drafted and signed</td>
+          <td>Business / Legal</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>Business bank statement (3–6 months) obtained</td>
+          <td>Business / Owner</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>Business address proof obtained</td>
+          <td>Business / Owner</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>Valuepay merchant account registered and KYC submitted</td>
+          <td>Business / Owner</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>Merchant account approved by Valuepay</td>
+          <td>Valuepay</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>API keys sent securely to developer</td>
+          <td>Business / Owner</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>Live domain (nakowa.com.ng) active with HTTPS</td>
+          <td>Developer</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>API keys configured in server environment</td>
+          <td>Developer</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>Webhook URL and redirect URL registered in Valuepay dashboard</td>
+          <td>Developer</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>End-to-end test payment completed and verified</td>
+          <td>Developer + Business</td>
+        </tr>
+        <tr>
+          <td>☐</td>
+          <td>System switched from test mode to live mode</td>
+          <td>Developer</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- FOOTER                                                     -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="doc-footer">
+    <p>
+      This document was prepared for <span class="nakowa">Nakowa Agricultural Supplies</span>,
+      Anguwan Jaba, Lafia, Nasarawa State, Nigeria.
+    </p>
+    <p style="margin-top:6px;">For technical queries, contact the system developer. For Valuepay onboarding queries, contact Valuepay support at <strong>valuepay.konplit.com</strong>.</p>
+    <p style="margin-top:10px;color:#bbb;font-size:8.5pt;">Nakowa AIOMS — Payment Integration Documentation · May 2026</p>
+  </div>
+
+</div>
+</body>
+</html>

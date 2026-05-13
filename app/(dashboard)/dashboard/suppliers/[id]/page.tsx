@@ -2,10 +2,13 @@ import { getSession } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { SupplierDetail } from "@/components/dashboard/supplier-detail";
+import { getPermissionsForRole } from "@/lib/permissions";
 
 export default async function SupplierDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session) redirect("/login");
+  const permissions = await getPermissionsForRole(session.role);
+  if (!permissions.suppliers.view) redirect("/dashboard");
 
   const { id } = await params;
 
@@ -23,7 +26,14 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
       },
       payments: {
         orderBy: { paidAt: "desc" },
-        include: {
+        select: {
+          id: true,
+          amount: true,
+          method: true,
+          reference: true,
+          receiptUrl: true,
+          notes: true,
+          paidAt: true,
           delivery: { select: { id: true, product: { select: { name: true } } } },
         },
       },
@@ -77,6 +87,7 @@ export default async function SupplierDetailPage({ params }: { params: Promise<{
           amount: p.amount.toNumber(),
           method: p.method,
           reference: p.reference,
+          receiptUrl: p.receiptUrl,
           notes: p.notes,
           paidAt: p.paidAt.toISOString(),
           delivery: p.delivery,

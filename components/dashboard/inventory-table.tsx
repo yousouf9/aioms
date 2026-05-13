@@ -59,11 +59,15 @@ export function InventoryTable({ products, categories: initialCategories, wareho
   const [categories, setCategories] = useState(initialCategories);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
 
   const filtered = products.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = !selectedCategory || p.category.name === selectedCategory;
-    return matchesSearch && matchesCategory;
+    if (!matchesSearch || !matchesCategory) return false;
+    if (!selectedLocation) return true;
+    const [locType, locId] = selectedLocation.split(":");
+    return p.locations.some((l) => l.type === locType && l.id === locId && l.quantity > 0);
   });
   const lowStockCount = products.filter((p) => p.isLowStock).length;
 
@@ -145,6 +149,27 @@ export function InventoryTable({ products, categories: initialCategories, wareho
         >
           <option value="">All Categories</option>
           {categories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+        </select>
+        <select
+          value={selectedLocation}
+          onChange={(e) => setSelectedLocation(e.target.value)}
+          className="h-11 px-3 rounded-[8px] bg-white border border-gray-200 text-agro-dark font-body text-sm focus:outline-none focus:border-primary transition-colors"
+        >
+          <option value="">All Locations</option>
+          {warehouses.length > 0 && (
+            <optgroup label="Warehouses">
+              {warehouses.map((w) => (
+                <option key={w.id} value={`warehouse:${w.id}`}>{w.name}</option>
+              ))}
+            </optgroup>
+          )}
+          {shops.length > 0 && (
+            <optgroup label="Shops">
+              {shops.map((s) => (
+                <option key={s.id} value={`shop:${s.id}`}>{s.name}</option>
+              ))}
+            </optgroup>
+          )}
         </select>
       </div>
 

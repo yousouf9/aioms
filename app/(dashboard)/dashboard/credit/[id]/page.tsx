@@ -25,6 +25,9 @@ const STATUS_LABELS: Record<string, string> = {
 
 const METHOD_LABELS: Record<string, string> = {
   CASH: "Cash",
+  TRANSFER: "Bank Transfer",
+  POS: "POS (Card)",
+  ONLINE: "Online Payment",
   BANK_TRANSFER: "Bank Transfer",
   MOBILE_MONEY: "Mobile Money",
   CARD: "Card",
@@ -64,7 +67,7 @@ export default async function CreditDetailPage({ params }: { params: Promise<{ i
 
   const totalAmount = credit.totalAmount.toNumber();
   const paidAmount = credit.paidAmount.toNumber();
-  const outstanding = totalAmount - paidAmount;
+  const outstanding = credit.status === "RETURNED" ? 0 : totalAmount - paidAmount;
 
   // Serialize for client components
   const serializedCredit = {

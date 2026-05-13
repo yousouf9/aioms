@@ -52,15 +52,15 @@ export async function GET() {
       db.$queryRaw<{ count: bigint }[]>`
         SELECT COUNT(DISTINCT p.id) as count
         FROM products p
-        WHERE p.is_active = true
+        WHERE p."isActive" = true
         AND (
           EXISTS (
             SELECT 1 FROM warehouse_stocks ws
-            WHERE ws.product_id = p.id AND ws.quantity <= p.low_stock_threshold
+            WHERE ws."productId" = p.id AND ws.quantity <= p."lowStockThreshold"
           )
           OR EXISTS (
             SELECT 1 FROM shop_stocks ss
-            WHERE ss.product_id = p.id AND ss.quantity <= p.low_stock_threshold
+            WHERE ss."productId" = p.id AND ss.quantity <= p."lowStockThreshold"
           )
         )
       `,
